@@ -62,6 +62,10 @@ export default function ServicesPage() {
 
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading…</div>
+      ) : services.length === 0 ? (
+        <div className="text-center py-12 text-gray-400 border border-brand-accent rounded-xl bg-white">
+          No services in the library yet — add your first service using the button above.
+        </div>
       ) : (
         <div className="bg-white rounded-xl border border-brand-accent overflow-hidden">
           {services.map((s, i) => (

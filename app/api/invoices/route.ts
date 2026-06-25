@@ -20,15 +20,28 @@ export async function POST(req: NextRequest) {
   const body: CreateInvoicePayload = await req.json()
   const db = createServerClient()
 
-  // Generate invoice number: YYYY + 3-digit sequence
-  const year = new Date().getFullYear()
-  const { count } = await db
-    .from('invoices')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', `${year}-01-01`)
+  // Determine invoice number
+  let invoice_number = body.invoice_number?.trim()
+  if (!invoice_number) {
+    const year = new Date().getFullYear()
+    const { count } = await db
+      .from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', `${year}-01-01`)
 
-  const seq = String((count ?? 0) + 1).padStart(3, '0')
-  const invoice_number = `${year}${seq}`
+    const seq = String((count ?? 0) + 1).padStart(3, '0')
+    invoice_number = `${year}${seq}`
+  } else {
+    const { data: existing } = await db
+      .from('invoices')
+      .select('id')
+      .eq('invoice_number', invoice_number)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json({ error: `Invoice number ${invoice_number} already exists.` }, { status: 400 })
+    }
+  }
 
   // Calculate totals server-side (source of truth)
   const { subtotal, discountAmount, taxAmount, total } = calcTotals(

@@ -8,31 +8,39 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
   try {
-    const { invoice_id } = await req.json()
-    if (!invoice_id) {
-      return NextResponse.json({ error: 'invoice_id required' }, { status: 400 })
+    const body = await req.json()
+    const { invoice_id, invoice: customInvoice } = body
+
+    let invoiceObj = customInvoice
+
+    if (!invoiceObj) {
+      if (!invoice_id) {
+        return NextResponse.json({ error: 'invoice_id or invoice object required' }, { status: 400 })
+      }
+
+      const db = createServerClient()
+
+      // Fetch invoice with customer and items
+      const { data: invoice, error } = await db
+        .from('invoices')
+        .select(`*, customer:customers(*), items:invoice_items(*)`)
+        .eq('id', invoice_id)
+        .single()
+
+      if (error || !invoice) {
+        return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+      }
+      invoiceObj = invoice
     }
 
-    const db = createServerClient()
-
-    // Fetch invoice with customer and items
-    const { data: invoice, error } = await db
-      .from('invoices')
-      .select(`*, customer:customers(*), items:invoice_items(*)`)
-      .eq('id', invoice_id)
-      .single()
-
-    if (error || !invoice) {
-      return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
-    }
-
-    const pdfBuffer = await generateInvoicePDF(invoice as Invoice)
+    const pdfBuffer = await generateInvoicePDF(invoiceObj as Invoice)
+    const filename = invoiceObj.invoice_number ? `Invoice-${invoiceObj.invoice_number}.pdf` : 'Invoice.pdf'
 
     return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Invoice-${invoice.invoice_number}.pdf"`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
       },
     })
   } catch (err: any) {

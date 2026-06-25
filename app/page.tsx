@@ -182,7 +182,14 @@ function InvoiceRow({
         !isLast ? 'border-b border-brand-accent' : ''
       }`}
     >
-      <span className="font-medium truncate">{(inv as any).customer?.name ?? '—'}</span>
+      <div className="flex flex-col min-w-0">
+        <span className="font-medium truncate">{(inv as any).customer?.name ?? '—'}</span>
+        {emailSent && (
+          <span className="text-[11px] text-green-600 font-semibold whitespace-nowrap mt-0.5 flex items-center gap-1" title={`Email sent on ${new Date(inv.email_sent_at!).toLocaleString()}`}>
+            ✉️ Sent {sentDate}
+          </span>
+        )}
+      </div>
       <span className="text-gray-500 font-mono text-xs">{inv.invoice_number}</span>
       <span className="text-gray-500 text-xs hidden sm:block">{formatDate(inv.issue_date)}</span>
       <span className="font-semibold">{formatCurrency(inv.total, inv.currency as any)}</span>
@@ -220,11 +227,6 @@ function InvoiceRow({
         >
           {sending ? '...' : emailSent ? '✉️ Resend' : 'Send'}
         </button>
-        {emailSent && (
-          <span className="text-[10px] text-green-600 whitespace-nowrap" title={`Email sent ${sentDate}`}>
-            ✓ {sentDate}
-          </span>
-        )}
       </div>
     </div>
   )
@@ -250,7 +252,7 @@ function EmptyState() {
         className="px-5 py-2 rounded-lg text-white text-sm"
         style={{ backgroundColor: '#C17A7A' }}
       >
-        Create your first invoice
+        Create your first invoice →
       </Link>
     </div>
   )

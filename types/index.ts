@@ -60,6 +60,7 @@ export interface Invoice {
 // ─── Form State (not saved to DB directly) ───
 
 export interface InvoiceFormState {
+  invoiceNumber: string
   customer: Customer | null
   items: InvoiceItem[]
   issueDate: string
@@ -75,6 +76,7 @@ export interface InvoiceFormState {
 // ─── API Payloads ────────────────────────────
 
 export interface CreateInvoicePayload {
+  invoice_number?: string
   customer_id: string
   items: Omit<InvoiceItem, 'id' | 'invoice_id'>[]
   issue_date: string

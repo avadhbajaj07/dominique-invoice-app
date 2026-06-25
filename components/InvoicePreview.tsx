@@ -2,6 +2,7 @@
 // components/InvoicePreview.tsx
 // Live preview matching the Canva reference invoice style — full A4 page.
 
+import { useState } from 'react'
 import { CLIENT } from '@/config/client'
 import type { InvoiceFormState, TotalsCalc } from '@/types'
 import { formatCurrency, formatDate } from '@/lib/helpers'
@@ -19,15 +20,71 @@ const BORDER = CLIENT.brand.border
 const WATERMARK = CLIENT.brand.watermark
 
 export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
-  const { customer, items, issueDate, dueDate, currency, taxRate, discount, discountType } = form
+  const [downloading, setDownloading] = useState(false)
+  const { customer, items, issueDate, dueDate, currency, taxRate, discount, discountType, notes } = form
   const issue = issueDate ? formatDate(issueDate).toUpperCase() : '-'
   const due = dueDate ? formatDate(dueDate).toUpperCase() : issue
 
+  const handleDownloadDraft = async () => {
+    setDownloading(true)
+    try {
+      const mockInvoice = {
+        invoice_number: invoiceNumber || 'PREVIEW',
+        customer,
+        issue_date: issueDate,
+        due_date: dueDate || null,
+        currency,
+        tax_rate: taxRate,
+        discount,
+        discount_type: discountType,
+        subtotal: totals.subtotal,
+        tax_amount: totals.taxAmount,
+        discount_amount: totals.discountAmount,
+        total: totals.total,
+        items,
+        notes: notes || null,
+      }
+
+      const res = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice: mockInvoice }),
+      })
+      if (!res.ok) throw new Error('Failed to generate PDF')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Invoice-${invoiceNumber || 'Draft'}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err: any) {
+      alert(err.message ?? 'Error downloading PDF preview')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   return (
     <div
-      className="max-w-full overflow-hidden rounded-[2px] border shadow-sm @container"
+      className="max-w-full overflow-hidden rounded-xl border shadow-sm @container"
       style={{ backgroundColor: PAPER, borderColor: CLIENT.brand.accent, color: INK, containerType: 'inline-size' }}
     >
+      {/* PDF download banner */}
+      <div className="flex items-center justify-between px-[6.7%] py-3 border-b border-brand-accent bg-[#F9F3EB]">
+        <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Invoice Live Preview</span>
+        <button
+          type="button"
+          onClick={handleDownloadDraft}
+          disabled={downloading}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-brand-accent hover:border-brand-primary text-gray-700 hover:text-brand-primary transition-all disabled:opacity-50"
+        >
+          {downloading ? 'Generating...' : '📥 Download PDF'}
+        </button>
+      </div>
+
       <div className="aspect-[595/842] w-full min-w-0 overflow-hidden font-sans relative flex flex-col">
 
         {/* ── Main content area ── */}
