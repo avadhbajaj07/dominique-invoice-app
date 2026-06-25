@@ -126,7 +126,6 @@ const S = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
   },
   tableBody: {
-    minHeight: 280,
     borderWidth: 1.6,
     borderColor: BORDER,
     borderRadius: 20,
@@ -184,11 +183,11 @@ const S = StyleSheet.create({
   totalValue: { color: '#FFFFFF', fontSize: 15, lineHeight: 18, fontFamily: 'Helvetica-Bold' },
 
   footer: {
-    height: 90,
     backgroundColor: INK,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 20,
+    paddingBottom: 20,
     paddingHorizontal: 40,
     flexDirection: 'row',
   },
@@ -237,83 +236,118 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
   const currency = invoice.currency
   const issueDate = formatDate(invoice.issue_date).toUpperCase()
   const dueDate = invoice.due_date ? formatDate(invoice.due_date).toUpperCase() : issueDate
+  const pageStyle = {
+    backgroundColor: PAPER,
+    padding: 40,
+    fontFamily: 'Helvetica',
+    color: INK,
+    fontSize: 11,
+    lineHeight: 1.4,
+  }
+  const labelStyle = {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 10,
+    color: INK,
+    marginBottom: 4,
+  }
+  const cellStyle = {
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: CLIENT.brand.accent,
+  }
 
   return (
     <Document>
-      <Page size="A4" style={S.page}>
-        <BrandMark watermark />
-        <View style={S.header}>
-          <Text style={S.headerTitle}>INVOICE</Text>
+      <Page size="A4" style={pageStyle}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 28 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: ROSE, fontFamily: 'Helvetica-Bold', fontSize: 42, marginBottom: 8 }}>
+              INVOICE
+            </Text>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 13 }}>{CLIENT.company}</Text>
+            <Text>{CLIENT.name}</Text>
+            <Text>{CLIENT.contact.email}</Text>
+          </View>
           <BrandMark />
         </View>
 
-        <View style={S.metaBox}>
-          <View style={S.metaItem}>
-            <Text style={S.metaLabel}>INVOICE NO:</Text>
-            <Text style={S.metaValue}>{invoice.invoice_number}</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            borderWidth: 1,
+            borderColor: CLIENT.brand.accent,
+            padding: 12,
+            marginBottom: 24,
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={labelStyle}>INVOICE NO</Text>
+            <Text>{invoice.invoice_number}</Text>
           </View>
-          <View style={S.metaItem}>
-            <Text style={S.metaLabel}>INVOICE DATE:</Text>
-            <Text style={S.metaValue}>{issueDate}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={labelStyle}>INVOICE DATE</Text>
+            <Text>{issueDate}</Text>
           </View>
-          <View style={S.metaItem}>
-            <Text style={S.metaLabel}>DUE DATE:</Text>
-            <Text style={S.metaValue}>{dueDate}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={labelStyle}>DUE DATE</Text>
+            <Text>{dueDate}</Text>
           </View>
         </View>
 
-        <View style={S.billTo}>
-          <Text style={S.billLabel}>INVOICE TO:</Text>
-          <Text style={S.customerName}>{customer?.name?.toUpperCase() ?? 'CLIENT'}</Text>
-          <Text style={S.payable}>
-            Payable: {CLIENT.payment.terms} to{' '}
-            <Text style={S.payableCompany}>{CLIENT.payment.beneficiary}</Text>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={labelStyle}>INVOICE TO</Text>
+          <Text style={{ color: ROSE, fontFamily: 'Helvetica-Bold', fontSize: 24, marginBottom: 6 }}>
+            {customer?.name?.toUpperCase() ?? 'CLIENT'}
           </Text>
-          {customer?.email && <Text style={S.customerDetail}>{customer.email}</Text>}
-          {customer?.address && <Text style={S.customerDetail}>{customer.address}</Text>}
+          {customer?.email && <Text>{customer.email}</Text>}
+          {customer?.address && <Text>{customer.address}</Text>}
         </View>
 
-        <View style={S.tableWrap} wrap={false}>
-          <View style={S.tableHeaderRow}>
-            <View style={S.tableHeaderMain}>
-              <Text style={[S.tableHeaderText, S.colDesc]}>DESCRIPTIONS</Text>
-              <Text style={[S.tableHeaderText, S.colPrice]}>PRICE</Text>
-              <Text style={[S.tableHeaderText, S.colQty]}>QTY</Text>
+        <View style={{ marginBottom: 26 }}>
+          <View style={{ flexDirection: 'row', backgroundColor: ROSE }}>
+            <Text style={[cellStyle, { width: 250, color: '#FFFFFF', fontFamily: 'Helvetica-Bold' }]}>
+              DESCRIPTION
+            </Text>
+            <Text style={[cellStyle, { width: 90, color: '#FFFFFF', fontFamily: 'Helvetica-Bold' }]}>PRICE</Text>
+            <Text style={[cellStyle, { width: 50, color: '#FFFFFF', fontFamily: 'Helvetica-Bold' }]}>QTY</Text>
+            <Text style={[cellStyle, { flex: 1, color: '#FFFFFF', fontFamily: 'Helvetica-Bold', textAlign: 'right' }]}>
+              AMOUNT
+            </Text>
+          </View>
+          {items.map((item, i) => (
+            <View key={i} style={{ flexDirection: 'row' }}>
+              <Text style={[cellStyle, { width: 250, fontFamily: 'Helvetica-Bold' }]}>{item.description}</Text>
+              <Text style={[cellStyle, { width: 90 }]}>{formatCurrency(item.rate, currency)}</Text>
+              <Text style={[cellStyle, { width: 50 }]}>{item.quantity}</Text>
+              <Text style={[cellStyle, { flex: 1, textAlign: 'right' }]}>{formatCurrency(item.amount, currency)}</Text>
             </View>
-            <View style={S.headerAmount}>
-              <Text style={S.tableHeaderAmountText}>AMOUNT</Text>
-            </View>
-          </View>
+          ))}
+        </View>
 
-          <View style={S.tableBody}>
-            {items.map((item, i) => (
-              <View key={i} style={S.row} wrap={false}>
-                <Text style={[S.descText, S.colDesc]}>{(item.description || '').toUpperCase()}</Text>
-                <Text style={[S.bodyText, S.colPrice]}>{formatCurrency(item.rate, currency)}</Text>
-                <Text style={[S.bodyText, S.colQty]}>{item.quantity}</Text>
-                <Text style={[S.bodyText, S.colAmount]}>{formatCurrency(item.amount, currency)}</Text>
-              </View>
-            ))}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={labelStyle}>PAYMENT DETAILS</Text>
+            <Text>Payable: {CLIENT.payment.terms}</Text>
+            <Text>Beneficiary: {CLIENT.payment.beneficiary}</Text>
+            <Text>IBAN: {CLIENT.payment.iban}</Text>
+            <Text>BIC: {CLIENT.payment.bic}</Text>
+          </View>
+          <View style={{ width: 180, backgroundColor: ROSE, padding: 16 }}>
+            <Text style={{ color: '#FFFFFF', fontFamily: 'Helvetica-Bold', fontSize: 12, marginBottom: 8 }}>TOTAL</Text>
+            <Text style={{ color: '#FFFFFF', fontFamily: 'Helvetica-Bold', fontSize: 16 }}>
+              {formatCurrency(invoice.total, currency)}
+            </Text>
           </View>
         </View>
 
-        <View style={S.paymentRow} wrap={false}>
-          <View style={S.paymentDetails}>
-            <Text style={S.paymentTitle}>PAYMENT DETAILS</Text>
-            <Text style={S.paymentText}>IBAN: {CLIENT.payment.iban}</Text>
-            <Text style={S.paymentText}>BIC: {CLIENT.payment.bic}</Text>
-          </View>
-          <View style={S.totalBox}>
-            <Text style={S.totalLabel}>TOTAL</Text>
-            <Text style={S.totalValue}>{formatCurrency(invoice.total, currency)}</Text>
-          </View>
-        </View>
+        {invoice.notes && <Text style={{ marginBottom: 18 }}>Notes: {invoice.notes}</Text>}
 
-        <View style={S.footer} wrap={false}>
-          <Text style={S.footerNote}>{CLIENT.invoice.footerNote2.toUpperCase()}</Text>
-          <View style={S.contact}>
-            <Text style={S.contactTitle}>CONTACT US</Text>
-            <Text style={S.contactText}>Email: {CLIENT.contact.email}</Text>
+        <View style={{ marginTop: 24, paddingTop: 14, borderTopWidth: 1, borderTopColor: CLIENT.brand.accent }}>
+          <Text style={{ fontFamily: 'Helvetica-Bold', marginBottom: 6 }}>{CLIENT.invoice.footerNote2}</Text>
+          <View>
+            <Text style={labelStyle}>CONTACT US</Text>
+            <Text>Email: {CLIENT.contact.email}</Text>
           </View>
         </View>
       </Page>
