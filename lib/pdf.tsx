@@ -255,7 +255,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
   const { customer, items = [] } = invoice
   const currency = invoice.currency
   const issueDate = formatDate(invoice.issue_date).toUpperCase()
-  const dueDate = invoice.due_date ? formatDate(invoice.due_date).toUpperCase() : issueDate
+  const dueDate = invoice.due_date ? formatDate(invoice.due_date).toUpperCase() : ''
 
   const hasDiscountOrTax = invoice.discount_amount > 0 || invoice.tax_rate > 0
 
@@ -286,10 +286,14 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
               <Text style={S.metaLabel}>Invoice Date:</Text>
               <Text style={S.metaValue}>{issueDate}</Text>
             </View>
-            <View style={S.metaItem}>
-              <Text style={S.metaLabel}>Due Date:</Text>
-              <Text style={S.metaValue}>{dueDate}</Text>
-            </View>
+            {dueDate ? (
+              <View style={S.metaItem}>
+                <Text style={S.metaLabel}>Due Date:</Text>
+                <Text style={S.metaValue}>{dueDate}</Text>
+              </View>
+            ) : (
+              <View style={S.metaItem} />
+            )}
           </View>
 
           {/* Invoice To */}
@@ -369,8 +373,13 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             </View>
           </View>
 
-          {/* Notes */}
-          {invoice.notes && <Text style={S.notes}>Notes: {invoice.notes}</Text>}
+          {/* Notes & Payment Instructions */}
+          {invoice.notes && (
+            <View style={{ marginBottom: 14 }}>
+              <Text style={[S.paymentTitle, { marginBottom: 4 }]}>Notes & Payment Instructions</Text>
+              <Text style={S.notes}>{invoice.notes}</Text>
+            </View>
+          )}
 
         </View>
 

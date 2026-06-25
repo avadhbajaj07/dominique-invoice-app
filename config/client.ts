@@ -6,6 +6,9 @@
 // ─────────────────────────────────────────────
 
 export const CLIENT = {
+  // App password (protects the entire app — change here to update)
+  appPassword: "dominique2026",
+
   // Identity
   name: "Dominique Vellutini",
   company: "Vellutini Dynamic Tutoring",

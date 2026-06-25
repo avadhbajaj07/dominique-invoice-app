@@ -23,7 +23,7 @@ const DEFAULT_STATE: InvoiceFormState = {
   customer: null,
   items: [],
   issueDate: today,
-  dueDate: addDays(today, 30), // Default to +30 days
+  dueDate: '',
   currency: CLIENT.invoice.defaultCurrency,
   taxRate: CLIENT.invoice.defaultTaxRate,
   discount: 0,

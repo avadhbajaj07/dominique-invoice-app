@@ -23,7 +23,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
   const [downloading, setDownloading] = useState(false)
   const { customer, items, issueDate, dueDate, currency, taxRate, discount, discountType, notes } = form
   const issue = issueDate ? formatDate(issueDate).toUpperCase() : '-'
-  const due = dueDate ? formatDate(dueDate).toUpperCase() : issue
+  const due = dueDate ? formatDate(dueDate).toUpperCase() : ''
 
   const handleDownloadDraft = async () => {
     setDownloading(true)
@@ -103,12 +103,12 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
 
           {/* Meta box: Invoice No / Date / Due Date */}
           <div
-            className="mb-[3.0%] grid min-w-0 grid-cols-3 rounded-[12px] border-[1.6px] px-[3.36%] py-[1.8%]"
+            className={`mb-[3.0%] grid min-w-0 ${due ? 'grid-cols-3' : 'grid-cols-2'} rounded-[12px] border-[1.6px] px-[3.36%] py-[1.8%]`}
             style={{ borderColor: BORDER }}
           >
             <MetaItem label="Invoice No:" value={invoiceNumber} />
             <MetaItem label="Invoice Date:" value={issue} />
-            <MetaItem label="Due Date:" value={due} />
+            {due && <MetaItem label="Due Date:" value={due} />}
           </div>
 
           {/* Invoice To */}
@@ -203,6 +203,16 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
               <span className="text-[2.52cqw] font-extrabold leading-none">{formatCurrency(totals.total, currency)}</span>
             </div>
           </div>
+
+          {/* Notes & Payment Instructions */}
+          {notes && (
+            <div className="mb-[3.0%]">
+              <p className="mb-[1.0%] text-[2.35cqw] font-extrabold uppercase leading-none">
+                Notes & Payment Instructions
+              </p>
+              <p className="text-[2.18cqw] leading-[1.4] whitespace-pre-wrap">{notes}</p>
+            </div>
+          )}
 
         </div>
 

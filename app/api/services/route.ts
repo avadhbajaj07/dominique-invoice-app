@@ -26,3 +26,19 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data, { status: 201 })
 }
+
+export async function PATCH(req: NextRequest) {
+  const body = await req.json()
+  const { id, ...updates } = body
+  if (!id) return NextResponse.json({ error: 'Service id is required' }, { status: 400 })
+
+  const db = createServerClient()
+  const { data, error } = await db
+    .from('services')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
+}
