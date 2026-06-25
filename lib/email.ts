@@ -10,15 +10,25 @@ import { formatCurrency } from './helpers'
 // ─── Transporter (Hostinger SMTP — SSL on port 465) ────────────
 
 function createTransporter() {
+  const host = process.env.SMTP_HOST || 'smtp.hostinger.com'
   const port = Number(process.env.SMTP_PORT) || 465
+  const user = process.env.SMTP_USER
+  const pass = process.env.SMTP_PASS
+
+  if (!user) {
+    throw new Error('SMTP_USER environment variable is not defined or empty in Vercel.')
+  }
+  if (!pass) {
+    throw new Error('SMTP_PASS environment variable is not defined or empty in Vercel.')
+  }
 
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+    host,
     port,
     secure: port === 465,           // SSL for 465, STARTTLS for 587
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user,
+      pass,
     },
     // Give serverless functions enough time
     connectionTimeout: 10_000,
