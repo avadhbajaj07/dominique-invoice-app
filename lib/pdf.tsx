@@ -1,5 +1,5 @@
 // lib/pdf.tsx
-// Generates the branded invoice PDF.
+// Generates the branded invoice PDF matching InvoicePreview.tsx design.
 
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, Image, renderToBuffer } from '@react-pdf/renderer'
@@ -14,42 +14,54 @@ const INK = CLIENT.brand.text
 const BORDER = CLIENT.brand.border
 const ROSE = CLIENT.brand.primary
 const PAPER = CLIENT.brand.background
-const WATERMARK = CLIENT.brand.watermark
+const ACCENT = CLIENT.brand.accent
 
 const S = StyleSheet.create({
   page: {
     backgroundColor: PAPER,
-    paddingHorizontal: 40,
-    paddingVertical: 35,
     fontFamily: 'Helvetica',
     color: INK,
+    fontSize: 11,
+    lineHeight: 1.4,
   },
 
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  // ── Main content wrapper (with horizontal + top padding) ──
+  content: {
+    flex: 1,
+    paddingHorizontal: 40,
+    paddingTop: 35,
+  },
+
+  // ── Header ──
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 25,
+  },
+  title: {
+    color: ROSE,
+    fontSize: 55,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 4,
+    marginBottom: 10,
+  },
+  companyName: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  companyDetail: {
+    fontSize: 10,
+    marginBottom: 1,
+  },
   topMark: {
     width: 80,
     height: 80,
-    objectFit: 'contain',
+    objectFit: 'contain' as any,
   },
 
-  title: {
-    marginTop: 20,
-    marginBottom: 15,
-    color: ROSE,
-    fontSize: 55,
-    lineHeight: 60,
-    fontFamily: 'Helvetica-Bold',
-    letterSpacing: 4,
-  },
-  headerTitle: {
-    marginTop: 20,
-    color: ROSE,
-    fontSize: 55,
-    lineHeight: 60,
-    fontFamily: 'Helvetica-Bold',
-    letterSpacing: 4,
-  },
-
+  // ── Meta box ──
   metaBox: {
     borderWidth: 1.6,
     borderColor: BORDER,
@@ -61,38 +73,37 @@ const S = StyleSheet.create({
   },
   metaItem: { flex: 1 },
   metaLabel: {
-    color: INK,
-    fontSize: 13,
-    lineHeight: 16,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     marginBottom: 6,
+    textTransform: 'uppercase' as any,
   },
-  metaValue: { color: INK, fontSize: 13, lineHeight: 16 },
+  metaValue: { fontSize: 11, textTransform: 'uppercase' as any },
 
+  // ── Invoice To ──
   billTo: { marginBottom: 25 },
   billLabel: {
-    color: INK,
-    fontSize: 16,
-    lineHeight: 20,
+    fontSize: 13,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 12,
+    marginBottom: 8,
+    textTransform: 'uppercase' as any,
   },
   customerName: {
     color: ROSE,
-    fontSize: 36,
-    lineHeight: 40,
+    fontSize: 32,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 8,
+    marginBottom: 6,
+    textTransform: 'uppercase' as any,
   },
-  payable: { color: INK, fontSize: 14, lineHeight: 18 },
+  payable: { fontSize: 12, lineHeight: 1.33 },
   payableCompany: { fontFamily: 'Helvetica-Bold' },
-  customerDetail: { color: INK, fontSize: 13, lineHeight: 18, marginTop: 3 },
+  customerDetail: { fontSize: 11, lineHeight: 1.4, marginTop: 2 },
 
+  // ── Table ──
   tableWrap: { marginBottom: 25 },
   tableHeaderRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    marginBottom: -1,
   },
   tableHeaderMain: {
     flex: 1,
@@ -103,54 +114,63 @@ const S = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: 'row',
   },
+  headerDesc: { width: 220 },
+  headerPrice: { width: 80, textAlign: 'center' },
+  headerQty: { flex: 1, textAlign: 'center' },
   headerAmount: {
     width: 140,
-    marginLeft: 8,
+    marginLeft: -1,
     borderWidth: 1.6,
     borderColor: BORDER,
     borderRadius: 12,
     paddingVertical: 12,
     backgroundColor: ROSE,
+    justifyContent: 'center',
   },
   tableHeaderText: {
-    color: INK,
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 12,
     fontFamily: 'Helvetica-Bold',
+    textTransform: 'uppercase' as any,
   },
   tableHeaderAmountText: {
     color: '#FFFFFF',
     textAlign: 'center',
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 12,
     fontFamily: 'Helvetica-Bold',
+    textTransform: 'uppercase' as any,
   },
   tableBody: {
     borderWidth: 1.6,
     borderColor: BORDER,
     borderRadius: 20,
+    marginTop: -1,
     paddingTop: 24,
     paddingHorizontal: 20,
     paddingBottom: 16,
+    minHeight: 200,
+    position: 'relative' as any,
   },
-  row: { flexDirection: 'row', marginBottom: 12 },
-  bodyText: { color: INK, fontSize: 14, lineHeight: 18 },
-  descText: { color: INK, fontSize: 14, lineHeight: 18, fontFamily: 'Helvetica-Bold' },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  descText: { fontSize: 12, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' as any },
+  bodyText: { fontSize: 12 },
   colDesc: { width: 220 },
   colPrice: { width: 80, textAlign: 'center' },
   colQty: { width: 45, textAlign: 'center' },
   colAmount: { flex: 1, textAlign: 'right' },
-
   watermark: {
-    position: 'absolute',
-    top: 291,
-    left: 167.5,
-    width: 260,
-    height: 260,
+    position: 'absolute' as any,
+    top: '10%',
+    left: '25%',
+    width: '50%',
+    height: '80%',
     opacity: 0.05,
-    objectFit: 'contain',
+    objectFit: 'contain' as any,
   },
 
+  // ── Payment + Total row ──
   paymentRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -158,13 +178,12 @@ const S = StyleSheet.create({
   },
   paymentDetails: { flex: 1, paddingTop: 14 },
   paymentTitle: {
-    color: INK,
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 12,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 12,
+    marginBottom: 8,
+    textTransform: 'uppercase' as any,
   },
-  paymentText: { color: INK, fontSize: 14, lineHeight: 18 },
+  paymentText: { fontSize: 12, lineHeight: 1.33 },
   totalBox: {
     width: 220,
     height: 80,
@@ -173,15 +192,19 @@ const S = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: ROSE,
     marginLeft: 20,
-    marginTop: 0,
     paddingHorizontal: 20,
-    paddingTop: 45,
+    paddingBottom: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
-  totalLabel: { color: '#FFFFFF', fontSize: 15, lineHeight: 18, fontFamily: 'Helvetica-Bold' },
-  totalValue: { color: '#FFFFFF', fontSize: 15, lineHeight: 18, fontFamily: 'Helvetica-Bold' },
+  totalLabel: { color: '#FFFFFF', fontSize: 13, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' as any },
+  totalValue: { color: '#FFFFFF', fontSize: 13, fontFamily: 'Helvetica-Bold' },
 
+  // ── Notes ──
+  notes: { fontSize: 11, marginBottom: 20 },
+
+  // ── Footer ──
   footer: {
     backgroundColor: INK,
     borderTopLeftRadius: 20,
@@ -190,45 +213,41 @@ const S = StyleSheet.create({
     paddingBottom: 20,
     paddingHorizontal: 40,
     flexDirection: 'row',
+    marginTop: 'auto',
   },
   footerNote: {
-    width: 250,
+    flex: 1.2,
     color: '#FFFFFF',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 1.38,
     fontFamily: 'Helvetica-BoldOblique',
   },
   contact: { flex: 1 },
   contactTitle: {
     color: '#FFFFFF',
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 12,
     fontFamily: 'Helvetica-Bold',
     marginBottom: 6,
+    textTransform: 'uppercase' as any,
   },
-  contactText: { color: ROSE, fontSize: 12, lineHeight: 18 },
+  contactText: { color: ROSE, fontSize: 11, lineHeight: 1.5 },
+
+  // ── Subtotals ──
+  subtotalsWrap: {
+    alignSelf: 'flex-end',
+    width: '36%',
+    marginBottom: 20,
+  },
+  subRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+    fontSize: 12,
+  },
 })
 
 interface InvoicePDFProps {
   invoice: Invoice
-}
-
-function BrandMark({ watermark = false }: { watermark?: boolean }) {
-  if (watermark) {
-    return (
-      <Image
-        style={S.watermark}
-        src={LOGO_PATH}
-      />
-    )
-  }
-
-  return (
-    <Image
-      style={S.topMark}
-      src={LOGO_PATH}
-    />
-  )
 }
 
 export function InvoicePDF({ invoice }: InvoicePDFProps) {
@@ -236,118 +255,130 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
   const currency = invoice.currency
   const issueDate = formatDate(invoice.issue_date).toUpperCase()
   const dueDate = invoice.due_date ? formatDate(invoice.due_date).toUpperCase() : issueDate
-  const pageStyle = {
-    backgroundColor: PAPER,
-    padding: 40,
-    fontFamily: 'Helvetica',
-    color: INK,
-    fontSize: 11,
-    lineHeight: 1.4,
-  }
-  const labelStyle = {
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 10,
-    color: INK,
-    marginBottom: 4,
-  }
-  const cellStyle = {
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: CLIENT.brand.accent,
-  }
+
+  const hasDiscountOrTax = invoice.discount_amount > 0 || invoice.tax_rate > 0
 
   return (
     <Document>
-      <Page size="A4" style={pageStyle}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 28 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: ROSE, fontFamily: 'Helvetica-Bold', fontSize: 42, marginBottom: 8 }}>
-              INVOICE
-            </Text>
-            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 13 }}>{CLIENT.company}</Text>
-            <Text>{CLIENT.name}</Text>
-            <Text>{CLIENT.contact.email}</Text>
-          </View>
-          <BrandMark />
-        </View>
+      <Page size="A4" style={S.page}>
+        {/* ── Main content ── */}
+        <View style={S.content}>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            borderWidth: 1,
-            borderColor: CLIENT.brand.accent,
-            padding: 12,
-            marginBottom: 24,
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>INVOICE NO</Text>
-            <Text>{invoice.invoice_number}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>INVOICE DATE</Text>
-            <Text>{issueDate}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>DUE DATE</Text>
-            <Text>{dueDate}</Text>
-          </View>
-        </View>
-
-        <View style={{ marginBottom: 24 }}>
-          <Text style={labelStyle}>INVOICE TO</Text>
-          <Text style={{ color: ROSE, fontFamily: 'Helvetica-Bold', fontSize: 24, marginBottom: 6 }}>
-            {customer?.name?.toUpperCase() ?? 'CLIENT'}
-          </Text>
-          {customer?.email && <Text>{customer.email}</Text>}
-          {customer?.address && <Text>{customer.address}</Text>}
-        </View>
-
-        <View style={{ marginBottom: 26 }}>
-          <View style={{ flexDirection: 'row', backgroundColor: ROSE }}>
-            <Text style={[cellStyle, { width: 250, color: '#FFFFFF', fontFamily: 'Helvetica-Bold' }]}>
-              DESCRIPTION
-            </Text>
-            <Text style={[cellStyle, { width: 90, color: '#FFFFFF', fontFamily: 'Helvetica-Bold' }]}>PRICE</Text>
-            <Text style={[cellStyle, { width: 50, color: '#FFFFFF', fontFamily: 'Helvetica-Bold' }]}>QTY</Text>
-            <Text style={[cellStyle, { flex: 1, color: '#FFFFFF', fontFamily: 'Helvetica-Bold', textAlign: 'right' }]}>
-              AMOUNT
-            </Text>
-          </View>
-          {items.map((item, i) => (
-            <View key={i} style={{ flexDirection: 'row' }}>
-              <Text style={[cellStyle, { width: 250, fontFamily: 'Helvetica-Bold' }]}>{item.description}</Text>
-              <Text style={[cellStyle, { width: 90 }]}>{formatCurrency(item.rate, currency)}</Text>
-              <Text style={[cellStyle, { width: 50 }]}>{item.quantity}</Text>
-              <Text style={[cellStyle, { flex: 1, textAlign: 'right' }]}>{formatCurrency(item.amount, currency)}</Text>
+          {/* Header: INVOICE + company info + logo */}
+          <View style={S.header}>
+            <View style={{ flex: 1 }}>
+              <Text style={S.title}>INVOICE</Text>
+              <Text style={S.companyName}>{CLIENT.company}</Text>
+              <Text style={S.companyDetail}>{CLIENT.name}</Text>
+              <Text style={S.companyDetail}>{CLIENT.contact.email}</Text>
             </View>
-          ))}
-        </View>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>PAYMENT DETAILS</Text>
-            <Text>Payable: {CLIENT.payment.terms}</Text>
-            <Text>Beneficiary: {CLIENT.payment.beneficiary}</Text>
-            <Text>IBAN: {CLIENT.payment.iban}</Text>
-            <Text>BIC: {CLIENT.payment.bic}</Text>
+            <Image style={S.topMark} src={LOGO_PATH} />
           </View>
-          <View style={{ width: 180, backgroundColor: ROSE, padding: 16 }}>
-            <Text style={{ color: '#FFFFFF', fontFamily: 'Helvetica-Bold', fontSize: 12, marginBottom: 8 }}>TOTAL</Text>
-            <Text style={{ color: '#FFFFFF', fontFamily: 'Helvetica-Bold', fontSize: 16 }}>
-              {formatCurrency(invoice.total, currency)}
+
+          {/* Meta box: Invoice No / Date / Due Date */}
+          <View style={S.metaBox}>
+            <View style={S.metaItem}>
+              <Text style={S.metaLabel}>Invoice No:</Text>
+              <Text style={S.metaValue}>{invoice.invoice_number}</Text>
+            </View>
+            <View style={S.metaItem}>
+              <Text style={S.metaLabel}>Invoice Date:</Text>
+              <Text style={S.metaValue}>{issueDate}</Text>
+            </View>
+            <View style={S.metaItem}>
+              <Text style={S.metaLabel}>Due Date:</Text>
+              <Text style={S.metaValue}>{dueDate}</Text>
+            </View>
+          </View>
+
+          {/* Invoice To */}
+          <View style={S.billTo}>
+            <Text style={S.billLabel}>Invoice To:</Text>
+            <Text style={S.customerName}>{customer?.name ?? 'Client Name'}</Text>
+            <Text style={S.payable}>
+              Payable: {CLIENT.payment.terms} to{' '}
+              <Text style={S.payableCompany}>{CLIENT.payment.beneficiary}</Text>
             </Text>
+            {customer?.email && <Text style={S.customerDetail}>{customer.email}</Text>}
+            {customer?.address && <Text style={S.customerDetail}>{customer.address}</Text>}
           </View>
+
+          {/* Items Table */}
+          <View style={S.tableWrap}>
+            {/* Table header row */}
+            <View style={S.tableHeaderRow}>
+              <View style={S.tableHeaderMain}>
+                <Text style={[S.tableHeaderText, S.headerDesc]}>Descriptions</Text>
+                <Text style={[S.tableHeaderText, S.headerPrice]}>Price</Text>
+                <Text style={[S.tableHeaderText, S.headerQty]}>Qty</Text>
+              </View>
+              <View style={S.headerAmount}>
+                <Text style={S.tableHeaderAmountText}>Amount</Text>
+              </View>
+            </View>
+
+            {/* Table body */}
+            <View style={S.tableBody}>
+              <Image style={S.watermark} src={LOGO_PATH} />
+              {items.map((item, i) => (
+                <View key={i} style={S.row}>
+                  <Text style={[S.descText, S.colDesc]}>{item.description || '-'}</Text>
+                  <Text style={[S.bodyText, S.colPrice]}>{formatCurrency(item.rate, currency)}</Text>
+                  <Text style={[S.bodyText, S.colQty]}>{item.quantity}</Text>
+                  <Text style={[S.bodyText, S.colAmount]}>{formatCurrency(item.amount, currency)}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Subtotals (if discount or tax) */}
+          {hasDiscountOrTax && (
+            <View style={S.subtotalsWrap}>
+              <View style={S.subRow}>
+                <Text>Subtotal</Text>
+                <Text>{formatCurrency(invoice.subtotal, currency)}</Text>
+              </View>
+              {invoice.discount_amount > 0 && (
+                <View style={S.subRow}>
+                  <Text>
+                    Discount{invoice.discount_type === 'percent' ? ` (${invoice.discount}%)` : ''}
+                  </Text>
+                  <Text>-{formatCurrency(invoice.discount_amount, currency)}</Text>
+                </View>
+              )}
+              {invoice.tax_rate > 0 && (
+                <View style={S.subRow}>
+                  <Text>Tax ({invoice.tax_rate}%)</Text>
+                  <Text>{formatCurrency(invoice.tax_amount, currency)}</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Payment Details + Total */}
+          <View style={S.paymentRow}>
+            <View style={S.paymentDetails}>
+              <Text style={S.paymentTitle}>Payment Details</Text>
+              <Text style={S.paymentText}>IBAN: {CLIENT.payment.iban}</Text>
+              <Text style={S.paymentText}>BIC: {CLIENT.payment.bic}</Text>
+            </View>
+            <View style={S.totalBox}>
+              <Text style={S.totalLabel}>Total</Text>
+              <Text style={S.totalValue}>{formatCurrency(invoice.total, currency)}</Text>
+            </View>
+          </View>
+
+          {/* Notes */}
+          {invoice.notes && <Text style={S.notes}>Notes: {invoice.notes}</Text>}
+
         </View>
 
-        {invoice.notes && <Text style={{ marginBottom: 18 }}>Notes: {invoice.notes}</Text>}
-
-        <View style={{ marginTop: 24, paddingTop: 14, borderTopWidth: 1, borderTopColor: CLIENT.brand.accent }}>
-          <Text style={{ fontFamily: 'Helvetica-Bold', marginBottom: 6 }}>{CLIENT.invoice.footerNote2}</Text>
-          <View>
-            <Text style={labelStyle}>CONTACT US</Text>
-            <Text>Email: {CLIENT.contact.email}</Text>
+        {/* ── Footer (dark bar at bottom) ── */}
+        <View style={S.footer}>
+          <Text style={S.footerNote}>{CLIENT.invoice.footerNote2}</Text>
+          <View style={S.contact}>
+            <Text style={S.contactTitle}>Contact Us</Text>
+            <Text style={S.contactText}>Email: {CLIENT.contact.email}</Text>
           </View>
         </View>
       </Page>

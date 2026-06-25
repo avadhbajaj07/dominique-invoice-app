@@ -4,6 +4,8 @@ import { createServerClient } from '@/lib/supabase'
 import { calcTotals } from '@/lib/helpers'
 import type { CreateInvoicePayload, InvoiceItem } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const db = createServerClient()
   const { data, error } = await db

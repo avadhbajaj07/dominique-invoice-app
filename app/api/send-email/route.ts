@@ -5,6 +5,8 @@ import { generateInvoicePDF } from '@/lib/pdf'
 import { sendInvoiceEmail } from '@/lib/email'
 import type { Invoice } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   try {
     const { invoice_id } = await req.json()

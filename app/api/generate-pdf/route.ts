@@ -4,6 +4,8 @@ import { createServerClient } from '@/lib/supabase'
 import { generateInvoicePDF } from '@/lib/pdf'
 import type { Invoice } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   try {
     const { invoice_id } = await req.json()
