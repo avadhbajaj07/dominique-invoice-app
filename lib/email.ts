@@ -5,7 +5,7 @@
 import nodemailer from 'nodemailer'
 import { CLIENT } from '@/config/client'
 import type { Invoice } from '@/types'
-import { formatCurrency } from './helpers'
+import { formatCurrency, formatDate } from './helpers'
 
 // ─── Transporter (Hostinger SMTP — SSL on port 465) ────────────
 
@@ -45,151 +45,95 @@ function buildEmailContent(invoice: Invoice): {
   htmlBody: string
 } {
   const customer = invoice.customer
-  const clientName = customer?.name ?? 'Client'
+  const clientFullName = customer?.name ?? 'Client'
   const currency = invoice.currency
+
+  // Extract and title-case first name (e.g., "AVADH RAJA BAJAJ" -> "Avadh")
+  const clientFirstNameRaw = clientFullName.trim().split(/\s+/)[0] || 'Client'
+  const clientFirstName = clientFirstNameRaw.charAt(0).toUpperCase() + clientFirstNameRaw.slice(1).toLowerCase()
 
   // Describe services (from invoice items)
   const servicesList = invoice.items ?? []
   const servicesSummary = servicesList.map(i => i.description).join(', ') || 'French lessons'
 
+  // Session date (formatted invoice date)
+  const sessionDate = formatDate(invoice.issue_date)
+
+  const totalStr = formatCurrency(invoice.total, currency)
+
   // Subject
   const subject = CLIENT.email.subjectTemplate
-    .replace('{INVOICE_NUMBER}', invoice.invoice_number)
     .replace('{SERVICES_SUMMARY}', servicesSummary)
 
   // ── Plain text fallback ──
   const textBody = CLIENT.email.bodyTemplate
-    .replace('{CLIENT_NAME}', clientName)
-    .replace('{INVOICE_NUMBER}', invoice.invoice_number)
+    .replace(/{CLIENT_FIRST_NAME}/g, clientFirstName)
     .replace('{SERVICES_SUMMARY}', servicesSummary)
-    .replace('{TOTAL}', `${formatCurrency(invoice.total, currency)}`)
-    .replace('{PAYMENT_TERMS}', CLIENT.payment.terms)
-    .replace('{IBAN}', CLIENT.payment.iban)
-    .replace('{BIC}', CLIENT.payment.bic)
-    .replace('{PHONE}', CLIENT.contact.phone)
-    .replace('{EMAIL}', CLIENT.contact.email)
+    .replace('{SESSION_DATE}', sessionDate)
+    .replace('{TOTAL}', totalStr)
 
-  // ── Professional HTML email ──
+  // ── Professional & Warm Branded HTML email ──
   const ROSE = CLIENT.brand.primary
   const BG = CLIENT.brand.background
   const INK = CLIENT.brand.text
 
-  const itemsRows = servicesList.map(item => `
-    <tr>
-      <td style="padding:8px 12px;border-bottom:1px solid #E8D5C4;font-size:14px;">${item.description}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #E8D5C4;font-size:14px;text-align:center;">${item.quantity}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #E8D5C4;font-size:14px;text-align:right;">${formatCurrency(item.rate, currency)}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #E8D5C4;font-size:14px;text-align:right;">${formatCurrency(item.amount, currency)}</td>
-    </tr>
-  `).join('')
-
-  const dueDate = invoice.due_date
-    ? new Date(invoice.due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
-    : 'At receipt'
-
   const htmlBody = `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:32px 16px;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background-color:${BG};border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-
-        <!-- Header -->
-        <tr>
-          <td style="background-color:${ROSE};padding:28px 32px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:1px;">
-              ${CLIENT.company}
-            </h1>
-            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">Invoice ${invoice.invoice_number}</p>
-          </td>
-        </tr>
-
-        <!-- Body -->
-        <tr>
-          <td style="padding:32px;">
-            <p style="margin:0 0 20px;color:${INK};font-size:15px;line-height:1.6;">
-              Dear <strong>${clientName}</strong>,
-            </p>
-            <p style="margin:0 0 24px;color:${INK};font-size:15px;line-height:1.6;">
-              Please find attached your invoice <strong>${invoice.invoice_number}</strong> for the following services:
-            </p>
-
-            <!-- Services Table -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8D5C4;border-radius:8px;overflow:hidden;margin-bottom:24px;">
-              <thead>
-                <tr style="background-color:${ROSE};">
-                  <th style="padding:10px 12px;color:#fff;font-size:13px;font-weight:600;text-align:left;">Service</th>
-                  <th style="padding:10px 12px;color:#fff;font-size:13px;font-weight:600;text-align:center;">Qty</th>
-                  <th style="padding:10px 12px;color:#fff;font-size:13px;font-weight:600;text-align:right;">Rate</th>
-                  <th style="padding:10px 12px;color:#fff;font-size:13px;font-weight:600;text-align:right;">Amount</th>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background-color:${BG};font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BG};padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:12px;border:1px solid #E8D5C4;box-shadow:0 4px 12px rgba(0,0,0,0.03);text-align:left;">
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#1A1A1A;">Hi ${clientFirstName},</p>
+              
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#1A1A1A;">I hope you're doing well! 😊</p>
+              
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#1A1A1A;">Please find attached your invoice for the following session(s):</p>
+              
+              <!-- Summary Card Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BG};border-radius:8px;margin-bottom:24px;border:1px solid #E8D5C4;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 8px;font-size:15px;line-height:1.5;color:#1A1A1A;">
+                      <span style="font-size:16px;margin-right:8px;">📚</span> <strong>${servicesSummary}</strong>
+                    </p>
+                    <p style="margin:0 0 8px;font-size:15px;line-height:1.5;color:#1A1A1A;">
+                      <span style="font-size:16px;margin-right:8px;">📅</span> ${sessionDate}
+                    </p>
+                    <p style="margin:0;font-size:15px;line-height:1.5;color:#1A1A1A;">
+                      <span style="font-size:16px;margin-right:8px;">💰</span> <strong>Total: ${totalStr}</strong>
+                    </p>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                ${itemsRows}
-              </tbody>
-            </table>
-
-            <!-- Total -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-              <tr>
-                <td style="text-align:right;">
-                  <div style="display:inline-block;background-color:${ROSE};color:#fff;padding:14px 28px;border-radius:10px;font-size:18px;font-weight:700;">
-                    Total: ${formatCurrency(invoice.total, currency)}
-                  </div>
-                </td>
-              </tr>
-            </table>
-
-            <p style="margin:0 0 4px;color:${INK};font-size:14px;">
-              <strong>Due:</strong> ${dueDate}
-            </p>
-            <p style="margin:0 0 20px;color:${INK};font-size:14px;">
-              <strong>Payment terms:</strong> ${CLIENT.payment.terms}
-            </p>
-
-            <!-- Payment Details Box -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff;border:1px solid #E8D5C4;border-radius:10px;overflow:hidden;margin-bottom:28px;">
-              <tr>
-                <td style="padding:18px 20px;">
-                  <p style="margin:0 0 10px;font-size:14px;font-weight:700;color:${INK};text-transform:uppercase;">Payment Details</p>
-                  <p style="margin:0 0 4px;font-size:14px;color:${INK};">
-                    <strong>IBAN:</strong> ${CLIENT.payment.iban}
-                  </p>
-                  <p style="margin:0 0 4px;font-size:14px;color:${INK};">
-                    <strong>BIC:</strong> ${CLIENT.payment.bic}
-                  </p>
-                  <p style="margin:0;font-size:14px;color:${INK};">
-                    <strong>Beneficiary:</strong> ${CLIENT.payment.beneficiary}
-                  </p>
-                </td>
-              </tr>
-            </table>
-
-            <p style="margin:0 0 6px;color:${INK};font-size:15px;line-height:1.6;">
-              Do not hesitate to contact me if you have any questions.
-            </p>
-            <p style="margin:0;color:${INK};font-size:15px;line-height:1.6;">
-              Warm regards,<br>
-              <strong>${CLIENT.name}</strong><br>
-              <span style="color:${ROSE};">${CLIENT.company}</span><br>
-              <span style="font-size:13px;">${CLIENT.contact.phone} · ${CLIENT.contact.email}</span>
-            </p>
-          </td>
-        </tr>
-
-        <!-- Footer -->
-        <tr>
-          <td style="background-color:${INK};padding:18px 32px;text-align:center;">
-            <p style="margin:0;color:${ROSE};font-size:12px;">
-              ${CLIENT.contact.email} · ${CLIENT.contact.phone} · ${CLIENT.contact.website}
-            </p>
-          </td>
-        </tr>
-
-      </table>
-    </td></tr>
+              </table>
+              
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#1A1A1A;">
+                Payment can be made directly to the bank details included in the invoice. If you have any questions or need anything adjusted, just reply to this email — I'm always happy to help.
+              </p>
+              
+              <p style="margin:0 0 32px;font-size:16px;line-height:1.6;color:#1A1A1A;">
+                Thank you so much for your trust, ${clientFirstName}. It's a real pleasure working with you!
+              </p>
+              
+              <!-- Signature -->
+              <p style="margin:0;font-size:15px;line-height:1.6;color:${INK};">
+                Warm regards,<br>
+                <strong>Dominique Vellutini</strong><br>
+                <span style="color:${ROSE};font-weight:600;">Vellutini Dynamic Tutoring</span><br>
+                <a href="mailto:hello@dominiquevellutini.com" style="color:${ROSE};text-decoration:none;">hello@dominiquevellutini.com</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>`

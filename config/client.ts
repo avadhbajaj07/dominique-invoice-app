@@ -61,24 +61,25 @@ export const CLIENT = {
   email: {
     fromName: "Vellutini Dynamic Tutoring",
     fromAddress: "hello@dominiquevellutini.com",
-    subjectTemplate: "Invoice {INVOICE_NUMBER} — {SERVICES_SUMMARY} — Vellutini Dynamic Tutoring",
-    bodyTemplate: `Dear {CLIENT_NAME},
+    subjectTemplate: "Your Invoice from Vellutini Dynamic Tutoring — {SERVICES_SUMMARY}",
+    bodyTemplate: `Hi {CLIENT_FIRST_NAME},
 
-Please find attached your invoice {INVOICE_NUMBER} for {SERVICES_SUMMARY}.
+I hope you're doing well! 😊
 
-Total amount due: {TOTAL} — {PAYMENT_TERMS}.
+Please find attached your invoice for the following session(s):
 
-Payment details:
-IBAN: {IBAN}
-BIC: {BIC}
+📚 {SERVICES_SUMMARY}
+📅 {SESSION_DATE}
+💰 Total: {TOTAL}
 
-Do not hesitate to contact me if you have any questions.
+Payment can be made directly to the bank details included in the invoice. If you have any questions or need anything adjusted, just reply to this email — I'm always happy to help.
+
+Thank you so much for your trust, {CLIENT_FIRST_NAME}. It's a real pleasure working with you!
 
 Warm regards,
 Dominique Vellutini
 Vellutini Dynamic Tutoring
-{PHONE}
-{EMAIL}`,
+hello@dominiquevellutini.com`,
   },
 
   // Pre-built services (seeded into Supabase on first run)
