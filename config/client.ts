@@ -61,7 +61,7 @@ export const CLIENT = {
   email: {
     fromName: "Vellutini Dynamic Tutoring",
     fromAddress: "hello@dominiquevellutini.com",
-    subjectTemplate: "Invoice {INVOICE_NUMBER} — Vellutini Dynamic Tutoring",
+    subjectTemplate: "Invoice {INVOICE_NUMBER} — {SERVICES_SUMMARY} — Vellutini Dynamic Tutoring",
     bodyTemplate: `Dear {CLIENT_NAME},
 
 Please find attached your invoice {INVOICE_NUMBER} for {SERVICES_SUMMARY}.

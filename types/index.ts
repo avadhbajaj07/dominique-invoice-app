@@ -1,6 +1,6 @@
 // types/index.ts — All shared TypeScript types
 
-export type InvoiceStatus = 'draft' | 'sent' | 'paid'
+export type InvoiceStatus = 'draft' | 'unpaid' | 'paid'
 export type DiscountType = 'fixed' | 'percent'
 export type Currency = 'CHF' | 'EUR' | 'USD' | 'GBP'
 
@@ -53,6 +53,7 @@ export interface Invoice {
   discount_amount: number
   total: number
   items?: InvoiceItem[]     // joined
+  email_sent_at: string | null  // ISO timestamp — null = not sent
   created_at: string
 }
 

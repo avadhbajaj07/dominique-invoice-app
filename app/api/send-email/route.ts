@@ -37,13 +37,13 @@ export async function POST(req: NextRequest) {
     // 3. Send email
     await sendInvoiceEmail(invoice as Invoice, pdfBuffer)
 
-    // 4. Update status to 'sent'
+    // 4. Record email_sent_at timestamp (do NOT change status — that's independent)
     await db
       .from('invoices')
-      .update({ status: 'sent' })
+      .update({ email_sent_at: new Date().toISOString() })
       .eq('id', invoice_id)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, email_sent_at: new Date().toISOString() })
   } catch (err: any) {
     console.error('Send email error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

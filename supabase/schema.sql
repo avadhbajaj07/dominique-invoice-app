@@ -35,7 +35,7 @@ create table if not exists invoices (
   customer_id       uuid references customers(id) on delete restrict,
   issue_date        date not null,
   due_date          date,
-  status            text default 'draft' check (status in ('draft','sent','paid')),
+  status            text default 'draft' check (status in ('draft','unpaid','paid')),
   currency          text default 'CHF',
   tax_rate          numeric(5, 2) default 0,
   discount          numeric(10, 2) default 0,
@@ -45,6 +45,7 @@ create table if not exists invoices (
   tax_amount        numeric(10, 2) not null default 0,
   discount_amount   numeric(10, 2) not null default 0,
   total             numeric(10, 2) not null default 0,
+  email_sent_at     timestamptz default null,
   created_at        timestamptz default now()
 );
 

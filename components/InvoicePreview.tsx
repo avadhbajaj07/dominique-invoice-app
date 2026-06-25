@@ -34,9 +34,9 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
         <div className="flex-1 px-[6.7%] pt-[5.9%]">
 
           {/* Header: INVOICE + Brand Mark */}
-          <div className="mb-[4.2%] flex items-start justify-between">
+          <div className="mb-[3.0%] flex items-start justify-between">
             <h2
-              className="text-[9.24cqw] font-bold uppercase leading-none tracking-[0.07em] mt-[3.4%] mb-[2.5%]"
+              className="text-[6.5cqw] font-bold uppercase leading-none tracking-[0.07em] mt-[2.5%] mb-[1.5%]"
               style={{ color: ROSE }}
             >
               Invoice
@@ -46,7 +46,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
 
           {/* Meta box: Invoice No / Date / Due Date */}
           <div
-            className="mb-[4.2%] grid min-w-0 grid-cols-3 rounded-[12px] border-[1.6px] px-[3.36%] py-[2.35%]"
+            className="mb-[3.0%] grid min-w-0 grid-cols-3 rounded-[12px] border-[1.6px] px-[3.36%] py-[1.8%]"
             style={{ borderColor: BORDER }}
           >
             <MetaItem label="Invoice No:" value={invoiceNumber} />
@@ -55,11 +55,11 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
           </div>
 
           {/* Invoice To */}
-          <section className="mb-[4.2%]">
-            <p className="mb-[2.0%] text-[2.69cqw] font-extrabold uppercase leading-none">
+          <section className="mb-[3.0%]">
+            <p className="mb-[1.5%] text-[2.69cqw] font-extrabold uppercase leading-none">
               Invoice To:
             </p>
-            <p className="mb-[1.3%] text-[6.05cqw] font-extrabold uppercase leading-none" style={{ color: ROSE }}>
+            <p className="mb-[1.0%] text-[4.2cqw] font-extrabold uppercase leading-none" style={{ color: ROSE }}>
               {customer ? customer.name : 'Client Name'}
             </p>
             <p className="break-words text-[2.35cqw] leading-[1.33]">
@@ -71,7 +71,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
           </section>
 
           {/* Items Table */}
-          <section className="mb-[4.2%]">
+          <section className="mb-[3.0%]">
             {/* Table header row */}
             <div className="grid grid-cols-[1fr_23.5%] items-stretch">
               <div
@@ -92,7 +92,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
 
             {/* Table body */}
             <div
-              className="relative -mt-[1px] min-h-[47cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[4.03%]"
+              className="relative -mt-[1px] min-h-[28cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[3.0%]"
               style={{ borderColor: BORDER }}
             >
               <Watermark />

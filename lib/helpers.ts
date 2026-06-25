@@ -65,16 +65,16 @@ export function calcTotals(
 
 export function statusColor(status: string): string {
   switch (status) {
-    case 'paid':  return 'bg-green-100 text-green-700'
-    case 'sent':  return 'bg-blue-100 text-blue-700'
-    default:      return 'bg-gray-100 text-gray-600'
+    case 'paid':    return 'bg-green-100 text-green-700'
+    case 'unpaid':  return 'bg-amber-100 text-amber-700'
+    default:        return 'bg-gray-100 text-gray-600'
   }
 }
 
 export function statusLabel(status: string): string {
   switch (status) {
-    case 'paid':  return 'Paid'
-    case 'sent':  return 'Sent'
-    default:      return 'Draft'
+    case 'paid':    return 'Paid'
+    case 'unpaid':  return 'Unpaid'
+    default:        return 'Draft'
   }
 }
