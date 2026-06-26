@@ -94,3 +94,26 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ...invoice, invoice_number }, { status: 201 })
 }
+
+export async function DELETE(req: NextRequest) {
+  const { invoice_id } = await req.json()
+  if (!invoice_id) return NextResponse.json({ error: 'invoice_id is required' }, { status: 400 })
+
+  const db = createServerClient()
+
+  // Delete line items first
+  const { error: itemsError } = await db
+    .from('invoice_items')
+    .delete()
+    .eq('invoice_id', invoice_id)
+  if (itemsError) return NextResponse.json({ error: itemsError.message }, { status: 500 })
+
+  // Delete the invoice
+  const { error: invoiceError } = await db
+    .from('invoices')
+    .delete()
+    .eq('id', invoice_id)
+  if (invoiceError) return NextResponse.json({ error: invoiceError.message }, { status: 500 })
+
+  return NextResponse.json({ success: true })
+}

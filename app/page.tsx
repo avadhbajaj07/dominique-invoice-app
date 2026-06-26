@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { formatCurrency, formatDate, statusColor, statusLabel } from '@/lib/helpers'
+import { formatCurrency, formatDate, statusColor, statusLabel, buildGmailShareUrl } from '@/lib/helpers'
 import type { Invoice, InvoiceStatus } from '@/types'
 
 export default function DashboardPage() {
@@ -72,6 +72,9 @@ export default function DashboardPage() {
               onUpdate={(updated) => {
                 setInvoices(prev => prev.map(x => x.id === inv.id ? { ...x, ...updated } : x))
               }}
+              onDelete={() => {
+                setInvoices(prev => prev.filter(x => x.id !== inv.id))
+              }}
             />
           ))}
         </div>
@@ -86,13 +89,16 @@ function InvoiceRow({
   invoice: inv,
   isLast,
   onUpdate,
+  onDelete,
 }: {
   invoice: Invoice
   isLast: boolean
   onUpdate: (updates: Partial<Invoice>) => void
+  onDelete: () => void
 }) {
   const [sending, setSending] = useState(false)
   const [changingStatus, setChangingStatus] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   // ── Status change handler ──
   const handleStatusChange = async (newStatus: InvoiceStatus) => {
@@ -169,12 +175,44 @@ function InvoiceRow({
     }
   }
 
+  // ── Share via Gmail (downloads PDF first, then opens mailto:) ──
+  const handleGmailShare = async () => {
+    await handleDownload()
+    const url = buildGmailShareUrl(inv as any)
+    window.open(url, '_blank')
+  }
+
+  // ── Delete invoice ──
+  const handleDelete = async () => {
+    const customerName = (inv as any).customer?.name ?? 'this client'
+    if (!confirm(`Delete invoice #${inv.invoice_number} for ${customerName}?\n\nThis cannot be undone.`)) return
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/invoices', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice_id: inv.id }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to delete invoice')
+      }
+      onDelete()
+    } catch (err: any) {
+      alert(err.message ?? 'Failed to delete invoice')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+
   const emailSent = !!inv.email_sent_at
   const sentDate = inv.email_sent_at
     ? new Date(inv.email_sent_at).toLocaleDateString('en-GB', {
         day: '2-digit', month: 'short',
       })
     : null
+
 
   return (
     <div
@@ -210,7 +248,7 @@ function InvoiceRow({
       </span>
 
       {/* Actions */}
-      <div className="flex gap-1 items-center">
+      <div className="flex gap-1 items-center flex-wrap">
         <button
           onClick={handleDownload}
           className="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -226,6 +264,21 @@ function InvoiceRow({
           title={emailSent ? `Sent ${sentDate}` : 'Send email'}
         >
           {sending ? '...' : emailSent ? '✉️ Resend' : 'Send'}
+        </button>
+        <button
+          onClick={handleGmailShare}
+          className="px-2 py-1 text-xs rounded bg-red-50 hover:bg-red-100 text-red-600 transition-colors"
+          title="Open in Gmail / Email app with pre-filled message (PDF downloads first)"
+        >
+          📧
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="px-2 py-1 text-xs rounded bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+          title="Delete invoice"
+        >
+          {deleting ? '...' : '🗑'}
         </button>
       </div>
     </div>

@@ -21,6 +21,7 @@ export default function ServicesPage() {
   const [editDesc, setEditDesc] = useState('')
   const [editPrice, setEditPrice] = useState('')
   const [editSaving, setEditSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/services').then(r => r.json()).then(d => { setServices(d); setLoading(false) })
@@ -69,6 +70,27 @@ export default function ServicesPage() {
       alert('Failed to update service')
     } finally {
       setEditSaving(false)
+    }
+  }
+
+  const handleDeleteService = async (serviceId: string, name: string) => {
+    if (!confirm(`Delete service "${name}"?\n\nThis cannot be undone.`)) return
+    setDeletingId(serviceId)
+    try {
+      const res = await fetch('/api/services', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service_id: serviceId }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to delete service')
+      }
+      setServices(prev => prev.filter(s => s.id !== serviceId))
+    } catch (err: any) {
+      alert(err.message ?? 'Failed to delete service')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -164,10 +186,19 @@ export default function ServicesPage() {
                     </p>
                     <button
                       onClick={() => startEdit(s)}
-                      className="text-xs text-gray-400 hover:text-gray-700 transition-colors px-2 py-1 rounded-lg hover:bg-gray-50 border border-transparent hover:border-brand-accent"
+                      disabled={deletingId !== null}
+                      className="text-xs text-gray-400 hover:text-gray-700 transition-colors px-2 py-1 rounded-lg hover:bg-gray-50 border border-transparent hover:border-brand-accent disabled:opacity-50"
                       title="Edit service"
                     >
                       ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteService(s.id, s.name)}
+                      disabled={deletingId !== null}
+                      className="text-xs text-red-400 hover:text-red-600 transition-colors px-2 py-1 rounded-lg hover:bg-red-50 border border-transparent hover:border-red-100 disabled:opacity-50"
+                      title="Delete service"
+                    >
+                      {deletingId === s.id ? 'Deleting…' : '🗑 Delete'}
                     </button>
                   </div>
                 </div>
