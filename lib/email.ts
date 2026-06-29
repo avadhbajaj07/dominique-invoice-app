@@ -72,7 +72,7 @@ function buildEmailContent(invoice: Invoice): {
     .replace('{SESSION_DATE}', sessionDate)
     .replace('{TOTAL}', totalStr)
 
-  // ── Professional & Warm Branded HTML email ──
+  // ── Professional \u0026 Branded HTML email ──
   const ROSE = CLIENT.brand.primary
   const BG = CLIENT.brand.background
   const INK = CLIENT.brand.text
@@ -91,42 +91,40 @@ function buildEmailContent(invoice: Invoice): {
         <table width="560" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:12px;border:1px solid #E8D5C4;box-shadow:0 4px 12px rgba(0,0,0,0.03);text-align:left;">
           <tr>
             <td style="padding:40px;">
-              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#1A1A1A;">Hi ${clientFirstName},</p>
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#1A1A1A;">Dear ${clientFirstName},</p>
               
-              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#1A1A1A;">I hope you're doing well! 😊</p>
-              
-              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#1A1A1A;">Please find attached your invoice for the following session(s):</p>
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#1A1A1A;">Please find attached your invoice for the following session:</p>
               
               <!-- Summary Card Box -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BG};border-radius:8px;margin-bottom:24px;border:1px solid #E8D5C4;">
                 <tr>
                   <td style="padding:16px 20px;">
                     <p style="margin:0 0 8px;font-size:15px;line-height:1.5;color:#1A1A1A;">
-                      <span style="font-size:16px;margin-right:8px;">📚</span> <strong>${servicesSummary}</strong>
+                      <strong>${servicesSummary}</strong>
                     </p>
                     <p style="margin:0 0 8px;font-size:15px;line-height:1.5;color:#1A1A1A;">
-                      <span style="font-size:16px;margin-right:8px;">📅</span> ${sessionDate}
+                      ${sessionDate}
                     </p>
                     <p style="margin:0;font-size:15px;line-height:1.5;color:#1A1A1A;">
-                      <span style="font-size:16px;margin-right:8px;">💰</span> <strong>Total: ${totalStr}</strong>
+                      <strong>Total: ${totalStr}</strong>
                     </p>
                   </td>
                 </tr>
               </table>
               
               <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#1A1A1A;">
-                Payment can be made directly to the bank details included in the invoice. If you have any questions or need anything adjusted, just reply to this email — I'm always happy to help.
+                If you have any questions regarding the invoice, please feel free to reply to this email.
               </p>
               
               <p style="margin:0 0 32px;font-size:16px;line-height:1.6;color:#1A1A1A;">
-                Thank you so much for your trust, ${clientFirstName}. It's a real pleasure working with you!
+                Thank you.
               </p>
               
               <!-- Signature -->
               <p style="margin:0;font-size:15px;line-height:1.6;color:${INK};">
-                Warm regards,<br>
+                Kind regards,<br><br>
                 <strong>Dominique Vellutini</strong><br>
-                <span style="color:${ROSE};font-weight:600;">Vellutini Dynamic Tutoring</span><br>
+                <span style="color:${ROSE};font-weight:600;">O TO T</span><br>
                 <a href="mailto:hello@dominiquevellutini.com" style="color:${ROSE};text-decoration:none;">hello@dominiquevellutini.com</a>
               </p>
             </td>

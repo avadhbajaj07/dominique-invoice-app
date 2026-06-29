@@ -1,5 +1,6 @@
 // lib/helpers.ts
 import type { Currency, InvoiceItem, TotalsCalc } from '@/types'
+import { CLIENT } from '@/config/client'
 
 // ─── Currency Formatting ─────────────────────
 
@@ -77,4 +78,46 @@ export function statusLabel(status: string): string {
     case 'unpaid':  return 'Unpaid'
     default:        return 'Draft'
   }
+}
+
+// ─── Share URL Builders ──────────────────────
+
+interface ShareableInvoice {
+  invoice_number: string
+  issue_date: string
+  currency: Currency
+  total: number
+  items?: { description: string }[]
+  customer?: { name?: string; email?: string | null; phone?: string | null } | null
+}
+
+/** Extract and title-case first name from full name */
+function extractFirstName(fullName: string): string {
+  const raw = fullName.trim().split(/\s+/)[0] || 'Client'
+  return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()
+}
+
+/**
+ * Build a mailto: URL for Gmail / default email client.
+ * Pre-fills To, Subject, and Body using CLIENT.email config.
+ */
+export function buildGmailShareUrl(invoice: ShareableInvoice): string {
+
+  const customerName = invoice.customer?.name ?? 'Client'
+  const clientFirstName = extractFirstName(customerName)
+  const servicesSummary = invoice.items?.map(i => i.description).join(', ') || 'French lessons'
+  const sessionDate = formatDate(invoice.issue_date)
+  const totalStr = formatCurrency(invoice.total, invoice.currency)
+
+  const subject = CLIENT.email.subjectTemplate
+    .replace('{SERVICES_SUMMARY}', servicesSummary)
+
+  const body = CLIENT.email.bodyTemplate
+    .replace(/{CLIENT_FIRST_NAME}/g, clientFirstName)
+    .replace('{SERVICES_SUMMARY}', servicesSummary)
+    .replace('{SESSION_DATE}', sessionDate)
+    .replace('{TOTAL}', totalStr)
+
+  const to = invoice.customer?.email ?? ''
+  return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }

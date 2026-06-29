@@ -65,23 +65,22 @@ export const CLIENT = {
     fromName: "Vellutini Dynamic Tutoring",
     fromAddress: "hello@dominiquevellutini.com",
     subjectTemplate: "Your Invoice from Vellutini Dynamic Tutoring — {SERVICES_SUMMARY}",
-    bodyTemplate: `Hi {CLIENT_FIRST_NAME},
+    bodyTemplate: `Dear {CLIENT_FIRST_NAME},
 
-I hope you're doing well! 😊
+Please find attached your invoice for the following session:
 
-Please find attached your invoice for the following session(s):
+{SERVICES_SUMMARY}
+{SESSION_DATE}
+Total: {TOTAL}
 
-📚 {SERVICES_SUMMARY}
-📅 {SESSION_DATE}
-💰 Total: {TOTAL}
+If you have any questions regarding the invoice, please feel free to reply to this email.
 
-Payment can be made directly to the bank details included in the invoice. If you have any questions or need anything adjusted, just reply to this email — I'm always happy to help.
+Thank you.
 
-Thank you so much for your trust, {CLIENT_FIRST_NAME}. It's a real pleasure working with you!
+Kind regards,
 
-Warm regards,
 Dominique Vellutini
-Vellutini Dynamic Tutoring
+O TO T
 hello@dominiquevellutini.com`,
   },
 

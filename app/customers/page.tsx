@@ -18,6 +18,7 @@ export default function CustomersPage() {
   const [saving, setSaving] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [deletingCustomer, setDeletingCustomer] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -83,6 +84,34 @@ export default function CustomersPage() {
   const totalUnpaid = clientInvoices
     .filter(inv => inv.status === 'unpaid')
     .reduce((sum, inv) => sum + inv.total, 0)
+
+  const handleDeleteCustomer = async () => {
+    if (!selectedCustomer) return
+    const invoiceCount = clientInvoices.length
+    const msg = invoiceCount > 0
+      ? `Delete "${selectedCustomer.name}" and their ${invoiceCount} invoice(s)?\n\nThis cannot be undone.`
+      : `Delete "${selectedCustomer.name}"?\n\nThis cannot be undone.`
+    if (!confirm(msg)) return
+    setDeletingCustomer(true)
+    try {
+      const res = await fetch('/api/customers', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_id: selectedCustomer.id }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to delete client')
+      }
+      setCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id))
+      setInvoices(prev => prev.filter(inv => inv.customer_id !== selectedCustomer.id))
+      setSelectedCustomer(null)
+    } catch (err: any) {
+      alert(err.message ?? 'Failed to delete client')
+    } finally {
+      setDeletingCustomer(false)
+    }
+  }
 
   return (
     <div className="relative">
@@ -246,9 +275,17 @@ export default function CustomersPage() {
             <div className="p-4 bg-white border-t border-brand-accent flex gap-2">
               <button
                 onClick={() => setSelectedCustomer(null)}
-                className="w-full py-2.5 rounded-lg text-sm border border-brand-accent text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-center"
+                className="flex-1 py-2.5 rounded-lg text-sm border border-brand-accent text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-center"
               >
                 Close Profile
+              </button>
+              <button
+                onClick={handleDeleteCustomer}
+                disabled={deletingCustomer}
+                className="px-4 py-2.5 rounded-lg text-sm border border-red-200 text-red-500 font-semibold hover:bg-red-50 hover:border-red-300 transition-colors disabled:opacity-50"
+                title={clientInvoices.length > 0 ? `Will also delete ${clientInvoices.length} invoice(s)` : 'Delete client'}
+              >
+                {deletingCustomer ? 'Deleting...' : '🗑 Delete Client'}
               </button>
             </div>
           </div>
