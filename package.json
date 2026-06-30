@@ -1,7 +1,7 @@
 {
   "name": "dominique-invoice-app",
   "version": "1.0.0",
-  "description": "Branded invoice generator — Vellutini Dynamic Tutoring",
+  "description": "Branded invoice generator — On Top Of Things",
   "private": true,
   "scripts": {
     "dev": "next dev",

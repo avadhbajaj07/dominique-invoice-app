@@ -11,7 +11,7 @@ export const CLIENT = {
 
   // Identity
   name: "Dominique Vellutini",
-  company: "Vellutini Dynamic Tutoring",
+  company: "On Top Of Things",
   tagline: "French Language Tutoring",
 
   // Brand
@@ -28,7 +28,7 @@ export const CLIENT = {
 
   // Contact
   contact: {
-    email: "hello@dominiquevellutini.com",
+    email: "domitini22@gmail.com",
     phone: "+41 79 173 26 64",
     address: "Alte Landstrasse 15",
     city: "8800 Thalwil",
@@ -41,7 +41,7 @@ export const CLIENT = {
     iban: "CH83 0023 0230 6679 3301 W",
     bic: "UBSWCHZH80A",
     bankName: "UBS Switzerland AG",
-    beneficiary: "Vellutini Dynamic Tutoring",
+    beneficiary: "On Top Of Things",
     terms: "Payment at receipt",
   },
 
@@ -62,9 +62,9 @@ export const CLIENT = {
 
   // Email template
   email: {
-    fromName: "Vellutini Dynamic Tutoring",
-    fromAddress: "hello@dominiquevellutini.com",
-    subjectTemplate: "Your Invoice from Vellutini Dynamic Tutoring — {SERVICES_SUMMARY}",
+    fromName: "On Top Of Things",
+    fromAddress: "domitini22@gmail.com",
+    subjectTemplate: "Your Invoice from On Top Of Things — {SERVICES_SUMMARY}",
     bodyTemplate: `Dear {CLIENT_FIRST_NAME},
 
 Please find attached your invoice for the following session:
@@ -81,7 +81,7 @@ Kind regards,
 
 Dominique Vellutini
 O TO T
-hello@dominiquevellutini.com`,
+domitini22@gmail.com`,
   },
 
   // Pre-built services (seeded into Supabase on first run)
