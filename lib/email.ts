@@ -1,6 +1,6 @@
 // lib/email.ts
 // Send invoice emails via Hostinger SMTP using Nodemailer.
-// No third-party services. Sends from hello@dominiquevellutini.com
+// No third-party services. Sends from config address
 
 import nodemailer from 'nodemailer'
 import { CLIENT } from '@/config/client'
@@ -125,7 +125,7 @@ function buildEmailContent(invoice: Invoice): {
                 Kind regards,<br><br>
                 <strong>Dominique Vellutini</strong><br>
                 <span style="color:${ROSE};font-weight:600;">O TO T</span><br>
-                <a href="mailto:hello@dominiquevellutini.com" style="color:${ROSE};text-decoration:none;">hello@dominiquevellutini.com</a>
+                <a href="mailto:${CLIENT.contact.email}" style="color:${ROSE};text-decoration:none;">${CLIENT.contact.email}</a>
               </p>
             </td>
           </tr>

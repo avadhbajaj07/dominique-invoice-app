@@ -239,7 +239,7 @@ function BrandMark() {
     <img
       src="/brand/logo.png"
       alt="Logo"
-      className="w-[18%] max-h-[14cqw] object-contain"
+      className="w-[26%] max-h-[18cqw] object-contain"
     />
   )
 }
@@ -249,7 +249,7 @@ function Watermark() {
     <img
       src="/brand/logo.png"
       alt="Watermark"
-      className="pointer-events-none absolute left-[25%] top-[10%] w-[50%] h-[80%] object-contain opacity-[0.05]"
+      className="pointer-events-none absolute left-[25%] top-[10%] w-[50%] h-[80%] object-contain opacity-[0.15]"
     />
   )
 }

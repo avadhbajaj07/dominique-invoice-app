@@ -57,8 +57,8 @@ const S = StyleSheet.create({
     marginBottom: 1,
   },
   topMark: {
-    width: 65,
-    height: 65,
+    width: 95,
+    height: 95,
     objectFit: 'contain' as any,
   },
 
@@ -167,7 +167,7 @@ const S = StyleSheet.create({
     left: '25%',
     width: '50%',
     height: '80%',
-    opacity: 0.05,
+    opacity: 0.15,
     objectFit: 'contain' as any,
   },
 
@@ -271,7 +271,6 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
               <Text style={S.title}>INVOICE</Text>
               <Text style={S.companyName}>{CLIENT.company}</Text>
               <Text style={S.companyDetail}>{CLIENT.name}</Text>
-              <Text style={S.companyDetail}>{CLIENT.contact.email}</Text>
             </View>
             <Image style={S.topMark} src={LOGO_PATH} />
           </View>
