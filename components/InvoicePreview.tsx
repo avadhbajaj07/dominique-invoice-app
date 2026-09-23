@@ -85,15 +85,15 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
         </button>
       </div>
 
-      <div className="aspect-[595/842] w-full min-w-0 overflow-hidden font-sans relative flex flex-col">
+      <div className="aspect-[595/680] w-full min-w-0 overflow-hidden font-sans relative flex flex-col">
 
         {/* ── Main content area ── */}
-        <div className="flex-1 px-[6.7%] pt-[5.9%]">
+        <div className="flex-1 px-[6.7%] pt-[4%]">
 
           {/* Header: INVOICE + Brand Mark */}
-          <div className="mb-[3.0%] flex items-start justify-between">
+          <div className="mb-[1.8%] flex items-start justify-between">
             <h2
-              className="text-[6.5cqw] font-bold uppercase leading-none tracking-[0.07em] mt-[2.5%] mb-[1.5%]"
+              className="text-[5.8cqw] font-bold uppercase leading-none tracking-[0.07em] mt-[1.5%] mb-[1.0%]"
               style={{ color: ROSE }}
             >
               Invoice
@@ -103,7 +103,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
 
           {/* Meta box: Invoice No / Date / Due Date */}
           <div
-            className={`mb-[3.0%] grid min-w-0 ${due ? 'grid-cols-3' : 'grid-cols-2'} rounded-[12px] border-[1.6px] px-[3.36%] py-[1.8%]`}
+            className={`mb-[1.8%] grid min-w-0 ${due ? 'grid-cols-3' : 'grid-cols-2'} rounded-[12px] border-[1.6px] px-[3.36%] py-[1.2%]`}
             style={{ borderColor: BORDER }}
           >
             <MetaItem label="Invoice No:" value={invoiceNumber} />
@@ -112,27 +112,27 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
           </div>
 
           {/* Invoice To */}
-          <section className="mb-[3.0%]">
+          <section className="mb-[1.8%]">
             <p className="mb-[1.5%] text-[2.69cqw] font-extrabold uppercase leading-none">
               Invoice To:
             </p>
-            <p className="mb-[1.0%] text-[4.2cqw] font-extrabold uppercase leading-none" style={{ color: ROSE }}>
+            <p className="mb-[0.8%] text-[3.4cqw] font-extrabold uppercase leading-none" style={{ color: ROSE }}>
               {customer ? customer.name : 'Client Name'}
             </p>
-            <p className="break-words text-[2.35cqw] leading-[1.33]">
+            <p className="break-words text-[2.18cqw] leading-[1.3]">
               Payable: {CLIENT.payment.terms} to{' '}
               <strong>{CLIENT.payment.beneficiary}</strong>
             </p>
-            {customer?.email && <p className="mt-[0.5%] text-[2.18cqw] leading-[1.4]">{customer.email}</p>}
-            {customer?.address && <p className="mt-[0.5%] text-[2.18cqw] leading-[1.4]">{customer.address}</p>}
+            {customer?.email && <p className="mt-[0.3%] text-[2.01cqw] leading-[1.3]">{customer.email}</p>}
+            {customer?.address && <p className="mt-[0.3%] text-[2.01cqw] leading-[1.3]">{customer.address}</p>}
           </section>
 
           {/* Items Table */}
-          <section className="mb-[3.0%]">
+          <section className="mb-[1.8%]">
             {/* Table header row */}
             <div className="grid grid-cols-[1fr_23.5%] items-stretch">
               <div
-                className="grid min-w-0 grid-cols-[220fr_80fr_45fr] rounded-[12px] border-[1.6px] px-[3.36%] py-[2.01%] text-[2.35cqw] font-extrabold uppercase leading-none"
+                className="grid min-w-0 grid-cols-[220fr_80fr_45fr] rounded-[12px] border-[1.6px] px-[3.36%] py-[1.5%] text-[2.18cqw] font-extrabold uppercase leading-none"
                 style={{ borderColor: BORDER }}
               >
                 <span>Descriptions</span>
@@ -140,7 +140,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
                 <span className="text-center">Qty</span>
               </div>
               <div
-                className="-ml-[1px] rounded-[12px] border-[1.6px] px-1 py-[2.01%] text-center text-[2.35cqw] font-extrabold uppercase text-white"
+                className="-ml-[1px] rounded-[12px] border-[1.6px] px-1 py-[1.5%] text-center text-[2.18cqw] font-extrabold uppercase text-white"
                 style={{ backgroundColor: ROSE, borderColor: BORDER }}
               >
                 Amount
@@ -149,7 +149,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
 
             {/* Table body */}
             <div
-              className="relative -mt-[1px] min-h-[28cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[3.0%]"
+              className="relative -mt-[1px] min-h-[26cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[2.5%]"
               style={{ borderColor: BORDER }}
             >
               <Watermark />
@@ -174,7 +174,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
 
           {/* Subtotals (if discount or tax) */}
           {(totals.discountAmount > 0 || taxRate > 0) && (
-            <div className="mb-[3.36%] ml-auto w-[36%] space-y-[0.8cqw] text-[2.35cqw]">
+            <div className="mb-[2.0%] ml-auto w-[36%] space-y-[0.5cqw] text-[2.18cqw]">
               <SubRow label="Subtotal" value={formatCurrency(totals.subtotal, currency)} />
               {totals.discountAmount > 0 && (
                 <SubRow
@@ -187,30 +187,30 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
           )}
 
           {/* Payment Details + Total */}
-          <div className="mb-[3.36%] grid grid-cols-[1fr_37%] gap-[3.36%]">
-            <div className="pt-[2.35%]">
-              <p className="mb-[2.01%] text-[2.35cqw] font-extrabold uppercase leading-none">
+          <div className="mb-[2.0%] grid grid-cols-[1fr_37%] gap-[3.36%]">
+            <div className="pt-[1.5%]">
+              <p className="mb-[1.5%] text-[2.18cqw] font-extrabold uppercase leading-none">
                 Payment Details
               </p>
-              <p className="break-words text-[2.35cqw] leading-[1.33]">IBAN: {CLIENT.payment.iban}</p>
-              <p className="break-words text-[2.35cqw] leading-[1.33]">BIC: {CLIENT.payment.bic}</p>
+              <p className="break-words text-[2.18cqw] leading-[1.3]">IBAN: {CLIENT.payment.iban}</p>
+              <p className="break-words text-[2.18cqw] leading-[1.3]">BIC: {CLIENT.payment.bic}</p>
             </div>
             <div
-              className="flex h-[13.4cqw] items-end justify-between rounded-[10px] border-[1.6px] px-[3.36%] pb-[3.36%] text-white"
+              className="flex h-[10.5cqw] items-end justify-between rounded-[10px] border-[1.6px] px-[3.36%] pb-[2.2%] text-white"
               style={{ backgroundColor: ROSE, borderColor: BORDER }}
             >
-              <span className="text-[2.52cqw] font-extrabold uppercase leading-none">Total</span>
-              <span className="text-[2.52cqw] font-extrabold leading-none">{formatCurrency(totals.total, currency)}</span>
+              <span className="text-[2.35cqw] font-extrabold uppercase leading-none">Total</span>
+              <span className="text-[2.35cqw] font-extrabold leading-none">{formatCurrency(totals.total, currency)}</span>
             </div>
           </div>
 
           {/* Notes & Payment Instructions */}
           {notes && (
-            <div className="mb-[3.0%]">
-              <p className="mb-[1.0%] text-[2.35cqw] font-extrabold uppercase leading-none">
+            <div className="mb-[1.8%]">
+              <p className="mb-[0.8%] text-[2.18cqw] font-extrabold uppercase leading-none">
                 Notes & Payment Instructions
               </p>
-              <p className="text-[2.18cqw] leading-[1.4] whitespace-pre-wrap">{notes}</p>
+              <p className="text-[2.01cqw] leading-[1.3] whitespace-pre-wrap">{notes}</p>
             </div>
           )}
 

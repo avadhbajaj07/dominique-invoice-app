@@ -9,6 +9,7 @@ import { CLIENT } from '@/config/client'
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
+  const [dbError, setDbError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
@@ -23,8 +24,25 @@ export default function ServicesPage() {
   const [editSaving, setEditSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  const loadServices = () => {
+    setLoading(true)
+    fetch('/api/services')
+      .then(async r => {
+        const d = await r.json()
+        if (!r.ok || !Array.isArray(d)) throw new Error(d?.error || 'Failed to load services')
+        setServices(d)
+        setDbError(null)
+      })
+      .catch(err => {
+        console.error('Failed to load services:', err)
+        setServices([])
+        setDbError(err.message || 'Database connection error')
+      })
+      .finally(() => setLoading(false))
+  }
+
   useEffect(() => {
-    fetch('/api/services').then(r => r.json()).then(d => { setServices(d); setLoading(false) })
+    loadServices()
   }, [])
 
   const handleAdd = async () => {
@@ -94,8 +112,42 @@ export default function ServicesPage() {
     }
   }
 
+  const safeServices = Array.isArray(services) ? services : []
+
   return (
     <div>
+      {/* ── Database Warning Banner ── */}
+      {dbError && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">⚠️</span>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm text-amber-900">Database Connection Required</h3>
+              <p className="mt-1 text-xs text-amber-800 leading-relaxed">
+                Unable to load services from the database. Free Supabase projects automatically pause after 7 days of inactivity.
+                Please visit your{' '}
+                <a
+                  href="https://supabase.com/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold underline hover:text-amber-950"
+                >
+                  Supabase Dashboard
+                </a>{' '}
+                and click <strong>&quot;Restore project&quot;</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={loadServices}
+                className="mt-3 inline-flex items-center rounded-lg bg-amber-800 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-900"
+              >
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-lg font-semibold">Service Library</h1>
@@ -123,13 +175,13 @@ export default function ServicesPage() {
 
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading…</div>
-      ) : services.length === 0 ? (
+      ) : safeServices.length === 0 ? (
         <div className="text-center py-12 text-gray-400 border border-brand-accent rounded-xl bg-white">
           No services in the library yet — add your first service using the button above.
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-brand-accent overflow-hidden">
-          {services.map((s, i) => (
+          {safeServices.map((s, i) => (
             <div key={s.id} className={`${i < services.length - 1 ? 'border-b border-brand-accent' : ''}`}>
               {editingId === s.id ? (
                 /* ── Inline Edit Form ── */
