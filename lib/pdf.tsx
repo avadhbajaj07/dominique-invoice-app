@@ -30,7 +30,7 @@ const S = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 36,
-    paddingTop: 28,
+    paddingTop: 20,
   },
 
   // ── Header ──
@@ -38,7 +38,7 @@ const S = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   title: {
     color: ROSE,
@@ -67,9 +67,9 @@ const S = StyleSheet.create({
     borderWidth: 1.4,
     borderColor: BORDER,
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingVertical: 6,
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 10,
     flexDirection: 'row',
   },
   metaItem: { flex: 1 },
@@ -82,7 +82,7 @@ const S = StyleSheet.create({
   metaValue: { fontSize: 9, textTransform: 'uppercase' as any },
 
   // ── Invoice To ──
-  billTo: { marginBottom: 16 },
+  billTo: { marginBottom: 10 },
   billLabel: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
@@ -91,17 +91,17 @@ const S = StyleSheet.create({
   },
   customerName: {
     color: ROSE,
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 4,
+    marginBottom: 2,
     textTransform: 'uppercase' as any,
   },
-  payable: { fontSize: 10, lineHeight: 1.3 },
+  payable: { fontSize: 9, lineHeight: 1.3 },
   payableCompany: { fontFamily: 'Helvetica-Bold' },
-  customerDetail: { fontSize: 9, lineHeight: 1.35, marginTop: 1 },
+  customerDetail: { fontSize: 8.5, lineHeight: 1.3, marginTop: 1 },
 
   // ── Table ──
-  tableWrap: { marginBottom: 16 },
+  tableWrap: { marginBottom: 10 },
   tableHeaderRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
@@ -111,7 +111,7 @@ const S = StyleSheet.create({
     borderWidth: 1.4,
     borderColor: BORDER,
     borderRadius: 10,
-    paddingVertical: 9,
+    paddingVertical: 6,
     paddingHorizontal: 16,
     flexDirection: 'row',
   },
@@ -124,7 +124,7 @@ const S = StyleSheet.create({
     borderWidth: 1.4,
     borderColor: BORDER,
     borderRadius: 10,
-    paddingVertical: 9,
+    paddingVertical: 6,
     backgroundColor: ROSE,
     justifyContent: 'center',
   },
@@ -145,10 +145,10 @@ const S = StyleSheet.create({
     borderColor: BORDER,
     borderRadius: 16,
     marginTop: -1,
-    paddingTop: 16,
+    paddingTop: 10,
     paddingHorizontal: 16,
-    paddingBottom: 12,
-    // No minHeight — let content dictate size for single-page fit
+    paddingBottom: 8,
+    minHeight: 110,
     position: 'relative' as any,
   },
   row: {
@@ -175,7 +175,7 @@ const S = StyleSheet.create({
   paymentRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 14,
+    marginBottom: 8,
   },
   paymentDetails: { flex: 1, paddingTop: 10 },
   paymentTitle: {
@@ -187,14 +187,14 @@ const S = StyleSheet.create({
   paymentText: { fontSize: 10, lineHeight: 1.3 },
   totalBox: {
     width: 190,
-    height: 60,
+    height: 48,
     borderWidth: 1.4,
     borderColor: BORDER,
     borderRadius: 10,
     backgroundColor: ROSE,
     marginLeft: 16,
     paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingBottom: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
@@ -203,15 +203,15 @@ const S = StyleSheet.create({
   totalValue: { color: '#FFFFFF', fontSize: 12, fontFamily: 'Helvetica-Bold' },
 
   // ── Notes ──
-  notes: { fontSize: 10, marginBottom: 14 },
+  notes: { fontSize: 10, marginBottom: 8 },
 
   // ── Footer ──
   footer: {
     backgroundColor: INK,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    paddingTop: 14,
-    paddingBottom: 14,
+    paddingTop: 10,
+    paddingBottom: 10,
     paddingHorizontal: 36,
     flexDirection: 'row',
     marginTop: 'auto',
@@ -237,7 +237,7 @@ const S = StyleSheet.create({
   subtotalsWrap: {
     alignSelf: 'flex-end',
     width: '36%',
-    marginBottom: 14,
+    marginBottom: 8,
   },
   subRow: {
     flexDirection: 'row',
@@ -261,7 +261,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
 
   return (
     <Document>
-      <Page size="A4" style={S.page}>
+      <Page size={[595.28, 680]} style={S.page}>
         {/* ── Main content ── */}
         <View style={S.content}>
 

@@ -15,14 +15,22 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
   const [shaking, setShaking] = useState(false)
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(AUTH_KEY)
-    setAuthenticated(stored === 'true')
+    try {
+      const stored = sessionStorage.getItem(AUTH_KEY)
+      setAuthenticated(stored === 'true')
+    } catch {
+      setAuthenticated(false)
+    }
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (password === CLIENT.appPassword) {
-      sessionStorage.setItem(AUTH_KEY, 'true')
+      try {
+        sessionStorage.setItem(AUTH_KEY, 'true')
+      } catch (err) {
+        console.warn('sessionStorage is not available:', err)
+      }
       setAuthenticated(true)
       setError('')
     } else {

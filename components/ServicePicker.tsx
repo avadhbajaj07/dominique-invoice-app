@@ -21,7 +21,16 @@ export default function ServicePicker({ onAdd }: Props) {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    fetch('/api/services').then(r => r.json()).then(setServices)
+    fetch('/api/services')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setServices(data)
+        else setServices([])
+      })
+      .catch(err => {
+        console.error('Failed to load services', err)
+        setServices([])
+      })
   }, [])
 
   const handleSaveNew = async () => {
@@ -45,11 +54,13 @@ export default function ServicePicker({ onAdd }: Props) {
     setSaving(false)
   }
 
+  const safeServices = Array.isArray(services) ? services : []
+
   return (
     <div className="min-w-0 overflow-hidden rounded-xl border border-brand-accent">
       {/* Service chips */}
       <div className="flex min-w-0 flex-wrap gap-1.5 bg-brand-light p-2">
-        {services.map(s => (
+        {safeServices.map(s => (
           <button
             key={s.id}
             type="button"

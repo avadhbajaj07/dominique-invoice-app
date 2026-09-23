@@ -25,7 +25,16 @@ export default function CustomerSelect({ value, onChange }: Props) {
 
   // Load customers
   useEffect(() => {
-    fetch('/api/customers').then(r => r.json()).then(setCustomers)
+    fetch('/api/customers')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setCustomers(data)
+        else setCustomers([])
+      })
+      .catch(err => {
+        console.error('Failed to load customers:', err)
+        setCustomers([])
+      })
   }, [])
 
   // Close on outside click
@@ -37,7 +46,8 @@ export default function CustomerSelect({ value, onChange }: Props) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const filtered = customers.filter(c =>
+  const safeCustomers = Array.isArray(customers) ? customers : []
+  const filtered = safeCustomers.filter(c =>
     c.name.toLowerCase().includes(query.toLowerCase()) ||
     c.email?.toLowerCase().includes(query.toLowerCase())
   )

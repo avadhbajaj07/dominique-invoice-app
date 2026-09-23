@@ -10,6 +10,7 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [dbError, setDbError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -20,18 +21,35 @@ export default function CustomersPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [deletingCustomer, setDeletingCustomer] = useState(false)
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true)
     Promise.all([
-      fetch('/api/customers').then(r => r.json()),
-      fetch('/api/invoices').then(r => r.json())
+      fetch('/api/customers').then(async r => {
+        const d = await r.json()
+        if (!r.ok || !Array.isArray(d)) throw new Error(d?.error || 'Failed to load clients')
+        return d
+      }),
+      fetch('/api/invoices').then(async r => {
+        const d = await r.json()
+        if (!r.ok || !Array.isArray(d)) throw new Error(d?.error || 'Failed to load invoices')
+        return d
+      }),
     ]).then(([custs, invs]) => {
-      setCustomers(custs || [])
-      setInvoices(invs || [])
-      setLoading(false)
+      setCustomers(Array.isArray(custs) ? custs : [])
+      setInvoices(Array.isArray(invs) ? invs : [])
+      setDbError(null)
     }).catch(err => {
       console.error(err)
+      setCustomers([])
+      setInvoices([])
+      setDbError(err.message || 'Database connection error')
+    }).finally(() => {
       setLoading(false)
     })
+  }
+
+  useEffect(() => {
+    loadData()
   }, [])
 
   const handleAdd = async () => {
@@ -73,17 +91,20 @@ export default function CustomersPage() {
     }
   }
 
+  const safeCustomers = Array.isArray(customers) ? customers : []
+  const safeInvoices = Array.isArray(invoices) ? invoices : []
+
   const clientInvoices = selectedCustomer
-    ? invoices.filter(inv => inv.customer_id === selectedCustomer.id)
+    ? safeInvoices.filter(inv => inv.customer_id === selectedCustomer.id)
     : []
 
   const totalInvoices = clientInvoices.length
   const totalPaid = clientInvoices
     .filter(inv => inv.status === 'paid')
-    .reduce((sum, inv) => sum + inv.total, 0)
+    .reduce((sum, inv) => sum + (inv.total || 0), 0)
   const totalUnpaid = clientInvoices
     .filter(inv => inv.status === 'unpaid')
-    .reduce((sum, inv) => sum + inv.total, 0)
+    .reduce((sum, inv) => sum + (inv.total || 0), 0)
 
   const handleDeleteCustomer = async () => {
     if (!selectedCustomer) return
@@ -115,6 +136,38 @@ export default function CustomersPage() {
 
   return (
     <div className="relative">
+      {/* ── Database Warning Banner ── */}
+      {dbError && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">⚠️</span>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm text-amber-900">Database Connection Required</h3>
+              <p className="mt-1 text-xs text-amber-800 leading-relaxed">
+                Unable to load clients from the database. Free Supabase projects automatically pause after 7 days of inactivity.
+                Please visit your{' '}
+                <a
+                  href="https://supabase.com/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold underline hover:text-amber-950"
+                >
+                  Supabase Dashboard
+                </a>{' '}
+                and click <strong>&quot;Restore project&quot;</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={loadData}
+                className="mt-3 inline-flex items-center rounded-lg bg-amber-800 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-900"
+              >
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-lg font-semibold">Clients</h1>
         <button
@@ -146,19 +199,19 @@ export default function CustomersPage() {
       {/* Client list */}
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading…</div>
-      ) : customers.length === 0 ? (
+      ) : safeCustomers.length === 0 ? (
         <div className="text-center py-12 text-gray-400 border border-brand-accent rounded-xl bg-white">
           No clients yet — add your first client using the button above.
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-brand-accent overflow-hidden shadow-sm">
-          {customers.map((c, i) => {
-            const count = invoices.filter(inv => inv.customer_id === c.id).length
+          {safeCustomers.map((c, i) => {
+            const count = safeInvoices.filter(inv => inv.customer_id === c.id).length
             return (
               <div
                 key={c.id}
                 onClick={() => setSelectedCustomer(c)}
-                className={`px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-brand-bg transition-colors duration-150 ${i < customers.length - 1 ? 'border-b border-brand-accent' : ''}`}
+                className={`px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-brand-bg transition-colors duration-150 ${i < safeCustomers.length - 1 ? 'border-b border-brand-accent' : ''}`}
               >
                 <div>
                   <p className="font-semibold text-sm text-gray-800">{c.name}</p>

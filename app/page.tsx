@@ -10,23 +10,69 @@ import type { Invoice, InvoiceStatus } from '@/types'
 export default function DashboardPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [dbError, setDbError] = useState<string | null>(null)
 
   const refresh = () => {
+    setLoading(true)
     fetch('/api/invoices')
-      .then(r => r.json())
-      .then(data => { setInvoices(data); setLoading(false) })
+      .then(async r => {
+        const data = await r.json()
+        if (!r.ok || !Array.isArray(data)) {
+          throw new Error(data?.error || 'Database connection error')
+        }
+        setInvoices(data)
+        setDbError(null)
+      })
+      .catch(err => {
+        console.error('Failed to load invoices:', err)
+        setInvoices([])
+        setDbError(err.message || 'Database connection error')
+      })
+      .finally(() => setLoading(false))
   }
 
   useEffect(() => { refresh() }, [])
 
-  const totalRevenue = invoices
+  const safeInvoices = Array.isArray(invoices) ? invoices : []
+  const totalRevenue = safeInvoices
     .filter(i => i.status === 'paid')
-    .reduce((s, i) => s + i.total, 0)
-  const unpaid = invoices.filter(i => i.status === 'unpaid').length
-  const drafts  = invoices.filter(i => i.status === 'draft').length
+    .reduce((s, i) => s + (i.total || 0), 0)
+  const unpaid = safeInvoices.filter(i => i.status === 'unpaid').length
+  const drafts = safeInvoices.filter(i => i.status === 'draft').length
 
   return (
     <div>
+      {/* ── Database Warning Banner ── */}
+      {dbError && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">⚠️</span>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm text-amber-900">Database Connection Required</h3>
+              <p className="mt-1 text-xs text-amber-800 leading-relaxed">
+                Unable to reach the database. Free Supabase projects automatically pause after 7 days of inactivity.
+                If your project was paused, please go to your{' '}
+                <a
+                  href="https://supabase.com/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold underline hover:text-amber-950"
+                >
+                  Supabase Dashboard
+                </a>{' '}
+                and click <strong>&quot;Restore project&quot;</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={refresh}
+                className="mt-3 inline-flex items-center rounded-lg bg-amber-800 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-900"
+              >
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ── Stats Row ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard label="Total Invoices" value={String(invoices.length)} />
