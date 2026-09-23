@@ -32,7 +32,8 @@ export interface InvoiceItem {
   description: string
   quantity: number
   rate: number
-  amount: number            // computed: quantity × rate
+  lessons?: number | null
+  amount: number            // computed: quantity × rate (× lessons if provided)
 }
 
 export interface Invoice {

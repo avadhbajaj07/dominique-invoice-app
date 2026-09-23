@@ -116,8 +116,12 @@ const S = StyleSheet.create({
     flexDirection: 'row',
   },
   headerDesc: { width: 200 },
+  headerDescWithLessons: { width: 155 },
   headerPrice: { width: 75, textAlign: 'center' },
+  headerPriceWithLessons: { width: 65, textAlign: 'center' },
   headerQty: { flex: 1, textAlign: 'center' },
+  headerQtyWithLessons: { width: 45, textAlign: 'center' },
+  headerLessons: { flex: 1, textAlign: 'center' },
   headerAmount: {
     width: 120,
     marginLeft: -1,
@@ -158,8 +162,12 @@ const S = StyleSheet.create({
   descText: { fontSize: 10, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' as any },
   bodyText: { fontSize: 10 },
   colDesc: { width: 200 },
+  colDescWithLessons: { width: 155 },
   colPrice: { width: 75, textAlign: 'center' },
+  colPriceWithLessons: { width: 65, textAlign: 'center' },
   colQty: { width: 45, textAlign: 'center' },
+  colQtyWithLessons: { width: 45, textAlign: 'center' },
+  colLessons: { width: 100, textAlign: 'center' },
   colAmount: { flex: 1, textAlign: 'right' },
   watermark: {
     position: 'absolute' as any,
@@ -308,32 +316,43 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
           </View>
 
           {/* Items Table */}
-          <View style={S.tableWrap}>
-            {/* Table header row */}
-            <View style={S.tableHeaderRow}>
-              <View style={S.tableHeaderMain}>
-                <Text style={[S.tableHeaderText, S.headerDesc]}>Descriptions</Text>
-                <Text style={[S.tableHeaderText, S.headerPrice]}>Price</Text>
-                <Text style={[S.tableHeaderText, S.headerQty]}>Qty</Text>
-              </View>
-              <View style={S.headerAmount}>
-                <Text style={S.tableHeaderAmountText}>Amount</Text>
-              </View>
-            </View>
-
-            {/* Table body */}
-            <View style={S.tableBody}>
-              <Image style={S.watermark} src={LOGO_PATH} />
-              {items.map((item, i) => (
-                <View key={i} style={S.row}>
-                  <Text style={[S.descText, S.colDesc]}>{item.description || '-'}</Text>
-                  <Text style={[S.bodyText, S.colPrice]}>{formatCurrency(item.rate, currency)}</Text>
-                  <Text style={[S.bodyText, S.colQty]}>{item.quantity}</Text>
-                  <Text style={[S.bodyText, S.colAmount]}>{formatCurrency(item.amount, currency)}</Text>
+          {(() => {
+            const hasLessons = items.some(item => item.lessons != null && Number(item.lessons) > 0)
+            return (
+              <View style={S.tableWrap}>
+                {/* Table header row */}
+                <View style={S.tableHeaderRow}>
+                  <View style={S.tableHeaderMain}>
+                    <Text style={[S.tableHeaderText, hasLessons ? S.headerDescWithLessons : S.headerDesc]}>Descriptions</Text>
+                    <Text style={[S.tableHeaderText, hasLessons ? S.headerPriceWithLessons : S.headerPrice]}>Price</Text>
+                    <Text style={[S.tableHeaderText, hasLessons ? S.headerQtyWithLessons : S.headerQty]}>Qty</Text>
+                    {hasLessons && <Text style={[S.tableHeaderText, S.headerLessons]}>No. of lessons</Text>}
+                  </View>
+                  <View style={S.headerAmount}>
+                    <Text style={S.tableHeaderAmountText}>Amount</Text>
+                  </View>
                 </View>
-              ))}
-            </View>
-          </View>
+
+                {/* Table body */}
+                <View style={S.tableBody}>
+                  <Image style={S.watermark} src={LOGO_PATH} />
+                  {items.map((item, i) => (
+                    <View key={i} style={S.row}>
+                      <Text style={[S.descText, hasLessons ? S.colDescWithLessons : S.colDesc]}>{item.description || '-'}</Text>
+                      <Text style={[S.bodyText, hasLessons ? S.colPriceWithLessons : S.colPrice]}>{formatCurrency(item.rate, currency)}</Text>
+                      <Text style={[S.bodyText, hasLessons ? S.colQtyWithLessons : S.colQty]}>{item.quantity}</Text>
+                      {hasLessons && (
+                        <Text style={[S.bodyText, S.colLessons]}>
+                          {item.lessons && Number(item.lessons) > 0 ? String(item.lessons) : ''}
+                        </Text>
+                      )}
+                      <Text style={[S.bodyText, S.colAmount]}>{formatCurrency(item.amount, currency)}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )
+          })()}
 
           {/* Subtotals (if discount or tax) */}
           {hasDiscountOrTax && (

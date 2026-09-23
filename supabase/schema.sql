@@ -57,6 +57,7 @@ create table if not exists invoice_items (
   description text not null,
   quantity    numeric(10, 2) default 1,
   rate        numeric(10, 2) not null,
+  lessons     numeric(10, 2) default null,
   amount      numeric(10, 2) not null
 );
 

@@ -23,7 +23,8 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
     const items = form.items.map((item, i) => {
       if (i !== idx) return item
       const updated = { ...item, ...patch }
-      updated.amount = updated.quantity * updated.rate
+      const lessonsMult = updated.lessons && Number(updated.lessons) > 0 ? Number(updated.lessons) : 1
+      updated.amount = lessonsMult * (updated.quantity || 1) * (updated.rate || 0)
       return updated
     })
     set({ items })
@@ -35,7 +36,7 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
 
   const addBlankItem = () => {
     set({
-      items: [...form.items, { description: '', quantity: 1, rate: 0, amount: 0 }],
+      items: [...form.items, { description: '', quantity: 1, rate: 0, lessons: null, amount: 0 }],
     })
   }
 
@@ -149,25 +150,42 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
                       className="field-input"
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div>
-                      <label className="field-label">Qty (Hours)</label>
+                      <label className="field-label">Price ({form.currency})</label>
                       <input
                         type="number"
-                        value={item.quantity}
-                        min={0.5}
-                        step={0.5}
-                        onChange={e => updateItem(i, { quantity: Number(e.target.value) })}
+                        value={item.rate === 0 ? '' : item.rate}
+                        min={0}
+                        placeholder="0.00"
+                        onChange={e => updateItem(i, { rate: e.target.value === '' ? 0 : Number(e.target.value) })}
                         className="field-input"
                       />
                     </div>
                     <div>
-                      <label className="field-label">Rate ({form.currency})</label>
+                      <label className="field-label">Qty (Hours)</label>
                       <input
                         type="number"
-                        value={item.rate}
-                        min={0}
-                        onChange={e => updateItem(i, { rate: Number(e.target.value) })}
+                        value={item.quantity === 0 ? '' : item.quantity}
+                        min={0.5}
+                        step={0.5}
+                        placeholder="1"
+                        onChange={e => updateItem(i, { quantity: e.target.value === '' ? 0 : Number(e.target.value) })}
+                        className="field-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="field-label">No. of Lessons</label>
+                      <input
+                        type="number"
+                        value={item.lessons ?? ''}
+                        min={1}
+                        step={1}
+                        placeholder="Blank"
+                        onChange={e => {
+                          const val = e.target.value === '' ? null : Number(e.target.value)
+                          updateItem(i, { lessons: val })
+                        }}
                         className="field-input"
                       />
                     </div>
