@@ -186,19 +186,6 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
             )
           })()}
 
-          {/* Subtotals (if discount or tax) */}
-          {(totals.discountAmount > 0 || taxRate > 0) && (
-            <div className="mb-[2.0%] ml-auto w-[36%] space-y-[0.5cqw] text-[2.18cqw]">
-              <SubRow label="Subtotal" value={formatCurrency(totals.subtotal, currency)} />
-              {totals.discountAmount > 0 && (
-                <SubRow
-                  label={`Discount${discountType === 'percent' ? ` (${discount}%)` : ''}`}
-                  value={`-${formatCurrency(totals.discountAmount, currency)}`}
-                />
-              )}
-              {taxRate > 0 && <SubRow label={`Tax (${taxRate}%)`} value={formatCurrency(totals.taxAmount, currency)} />}
-            </div>
-          )}
 
           {/* Payment Details + Total */}
           <div className="mb-[2.0%] grid grid-cols-[1fr_37%] gap-[3.36%]">

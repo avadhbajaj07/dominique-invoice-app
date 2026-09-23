@@ -215,53 +215,6 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
         )}
       </div>
 
-      {/* ── Discounts & Tax Section ── */}
-      <div className="border-t border-brand-accent pt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {/* Discount Fields */}
-        <div className="space-y-2 p-3 rounded-lg bg-brand-bg border border-brand-accent">
-          <label className="field-label font-semibold text-gray-700">Discount</label>
-          <div className="flex gap-2">
-            <select
-              value={form.discountType}
-              onChange={e => set({ discountType: e.target.value as any })}
-              className="field-input"
-              style={{ flex: '1' }}
-            >
-              <option value="fixed">Fixed ({form.currency})</option>
-              <option value="percent">Percentage (%)</option>
-            </select>
-            <input
-              type="number"
-              value={form.discount}
-              min={0}
-              max={form.discountType === 'percent' ? 100 : undefined}
-              onChange={e => set({ discount: Number(e.target.value) })}
-              className="field-input text-right font-mono"
-              style={{ flex: '1' }}
-              placeholder="0.00"
-            />
-          </div>
-        </div>
-
-        {/* Tax Field */}
-        <div className="space-y-2 p-3 rounded-lg bg-brand-bg border border-brand-accent">
-          <label className="field-label font-semibold text-gray-700">Tax / VAT</label>
-          <div className="flex gap-2 items-center">
-            <input
-              type="number"
-              value={form.taxRate}
-              min={0}
-              max={100}
-              step={0.5}
-              onChange={e => set({ taxRate: Number(e.target.value) })}
-              className="field-input text-right font-mono"
-              placeholder="0.0%"
-            />
-            <span className="text-[10px] sm:text-xs text-gray-500 whitespace-nowrap">(Tutoring in Switzerland is VAT-exempt)</span>
-          </div>
-        </div>
-      </div>
-
       {/* ── Notes Section ── */}
       <div className="border-t border-brand-accent pt-5">
         <label className="field-label font-semibold text-gray-700">Notes & Payment Instructions</label>
@@ -278,32 +231,19 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
       <TotalsSummary
         totals={totals}
         currency={form.currency}
-        taxRate={form.taxRate}
-        discount={form.discount}
-        discountType={form.discountType}
       />
 
     </div>
   )
 }
 
-function TotalsSummary({ totals, currency, taxRate, discount, discountType }: {
+function TotalsSummary({ totals, currency }: {
   totals: TotalsCalc
   currency: any
-  taxRate: number
-  discount: number
-  discountType: string
 }) {
   return (
     <div className="border-t border-brand-accent pt-4 space-y-1">
-      <Row label="Subtotal" value={formatCurrency(totals.subtotal, currency)} />
-      {totals.discountAmount > 0 && (
-        <Row label={`Discount${discountType === 'percent' ? ` (${discount}%)` : ''}`} value={`−${formatCurrency(totals.discountAmount, currency)}`} />
-      )}
-      {taxRate > 0 && (
-        <Row label={`Tax (${taxRate}%)`} value={formatCurrency(totals.taxAmount, currency)} />
-      )}
-      <div className="flex justify-between font-bold pt-2 border-t border-brand-accent text-base">
+      <div className="flex justify-between font-bold pt-2 text-base">
         <span>Invoice Total</span>
         <span style={{ color: '#C17A7A' }}>{formatCurrency(totals.total, currency)}</span>
       </div>
