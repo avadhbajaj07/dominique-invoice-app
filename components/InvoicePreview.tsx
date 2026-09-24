@@ -128,52 +128,61 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
           </section>
 
           {/* Items Table */}
-          <section className="mb-[1.8%]">
-            {/* Table header row */}
-            <div className="grid grid-cols-[1fr_23.5%] items-stretch">
-              <div
-                className="grid min-w-0 grid-cols-[200fr_75fr_75fr] rounded-[12px] border-[1.6px] px-[3.36%] py-[1.5%] text-[2.18cqw] font-extrabold uppercase leading-none"
-                style={{ borderColor: BORDER }}
-              >
-                <span>Description</span>
-                <span className="text-center">Price</span>
-                <span className="text-center">Sessions</span>
-              </div>
-              <div
-                className="-ml-[1px] rounded-[12px] border-[1.6px] px-1 py-[1.5%] text-center text-[2.18cqw] font-extrabold uppercase text-white"
-                style={{ backgroundColor: ROSE, borderColor: BORDER }}
-              >
-                Total
-              </div>
-            </div>
-
-            {/* Table body */}
-            <div
-              className="relative -mt-[1px] min-h-[26cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[2.5%]"
-              style={{ borderColor: BORDER }}
-            >
-              <Watermark />
-              {items.length === 0 ? (
-                <p className="relative text-center text-[2.35cqw]" style={{ color: ROSE }}>
-                  Add services to see them here
-                </p>
-              ) : (
-                <div className="relative space-y-[2cqw]">
-                  {items.map((item, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-[200fr_75fr_75fr_107fr] items-start text-[2.35cqw] leading-none mb-[2.01%] last:mb-0"
-                    >
-                      <span className="font-semibold uppercase truncate">{item.description || '-'}</span>
-                      <span className="text-center truncate">{formatCurrency(item.rate, currency)}</span>
-                      <span className="text-center truncate">{item.sessions ?? item.quantity ?? 1}</span>
-                      <span className="text-right truncate">{formatCurrency(item.amount, currency)}</span>
-                    </div>
-                  ))}
+          {(() => {
+            const hasPerson = items.some(i => Boolean(i.person_name && i.person_name.trim()))
+            return (
+              <section className="mb-[1.8%]">
+                {/* Table header row */}
+                <div className="grid grid-cols-[1fr_23.5%] items-stretch">
+                  <div
+                    className={`grid min-w-0 ${hasPerson ? 'grid-cols-[140fr_110fr_50fr_50fr]' : 'grid-cols-[200fr_75fr_75fr]'} rounded-[12px] border-[1.6px] px-[3.36%] py-[1.5%] text-[2.18cqw] font-extrabold uppercase leading-none`}
+                    style={{ borderColor: BORDER }}
+                  >
+                    <span>{hasPerson ? 'Service' : 'Description'}</span>
+                    {hasPerson && <span>Person</span>}
+                    <span className="text-center">Price</span>
+                    <span className="text-center">Sessions</span>
+                  </div>
+                  <div
+                    className="-ml-[1px] rounded-[12px] border-[1.6px] px-1 py-[1.5%] text-center text-[2.18cqw] font-extrabold uppercase text-white"
+                    style={{ backgroundColor: ROSE, borderColor: BORDER }}
+                  >
+                    Total
+                  </div>
                 </div>
-              )}
-            </div>
-          </section>
+
+                {/* Table body */}
+                <div
+                  className="relative -mt-[1px] min-h-[26cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[2.5%]"
+                  style={{ borderColor: BORDER }}
+                >
+                  <Watermark />
+                  {items.length === 0 ? (
+                    <p className="relative text-center text-[2.35cqw]" style={{ color: ROSE }}>
+                      Add services to see them here
+                    </p>
+                  ) : (
+                    <div className="relative space-y-[2cqw]">
+                      {items.map((item, i) => (
+                        <div
+                          key={i}
+                          className={`grid ${hasPerson ? 'grid-cols-[140fr_110fr_50fr_50fr_107fr]' : 'grid-cols-[200fr_75fr_75fr_107fr]'} items-start text-[2.35cqw] leading-none mb-[2.01%] last:mb-0`}
+                        >
+                          <span className="font-semibold uppercase truncate">{item.service_name || item.description || '-'}</span>
+                          {hasPerson && (
+                            <span className="font-medium uppercase truncate">{item.person_name || ''}</span>
+                          )}
+                          <span className="text-center truncate">{formatCurrency(item.rate, currency)}</span>
+                          <span className="text-center truncate">{item.sessions ?? item.quantity ?? 1}</span>
+                          <span className="text-right truncate">{formatCurrency(item.amount, currency)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )
+          })()}
 
           {/* Payment Details + Total */}
           <div className="mb-[2.0%] grid grid-cols-[1fr_37%] gap-[3.36%]">

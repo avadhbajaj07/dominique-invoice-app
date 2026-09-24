@@ -30,6 +30,8 @@ export interface InvoiceItem {
   invoice_id?: string
   service_id?: string | null
   description: string
+  service_name?: string
+  person_name?: string | null
   rate: number              // price per session
   sessions?: number         // number of sessions
   quantity?: number         // backward compat

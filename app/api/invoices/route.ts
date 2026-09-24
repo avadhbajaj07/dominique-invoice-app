@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Insert line items
-  const itemsToInsert = body.items.map(item => {
+  const itemsWithPerson = body.items.map(item => {
     const sessions = item.sessions != null && !isNaN(item.sessions)
       ? Number(item.sessions)
       : (item.quantity != null ? Number(item.quantity) : 1)
@@ -86,19 +86,30 @@ export async function POST(req: NextRequest) {
     const amount = item.amount != null && !isNaN(item.amount)
       ? Number(item.amount)
       : rate * sessions
+    const serviceName = item.service_name || item.description || ''
+    const personName = item.person_name?.trim() || null
+
     return {
       invoice_id: invoice.id,
       service_id: item.service_id ?? null,
-      description: item.description,
+      description: item.description || serviceName,
+      service_name: serviceName,
+      person_name: personName,
       quantity: sessions,
       rate,
       amount,
     }
   })
 
-  const { error: itemsError } = await db.from('invoice_items').insert(itemsToInsert)
+  // Try inserting with service_name and person_name columns
+  const { error: itemsError } = await db.from('invoice_items').insert(itemsWithPerson)
   if (itemsError) {
-    return NextResponse.json({ error: itemsError.message }, { status: 500 })
+    // Fallback to inserting without service_name and person_name if columns are not present in schema
+    const itemsWithoutPerson = itemsWithPerson.map(({ service_name, person_name, ...rest }) => rest)
+    const { error: fallbackError } = await db.from('invoice_items').insert(itemsWithoutPerson)
+    if (fallbackError) {
+      return NextResponse.json({ error: fallbackError.message }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ ...invoice, invoice_number }, { status: 201 })

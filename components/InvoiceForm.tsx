@@ -37,7 +37,17 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
 
   const addBlankItem = () => {
     set({
-      items: [...form.items, { description: '', sessions: 1, rate: 0, amount: 0 }],
+      items: [
+        ...form.items,
+        {
+          service_name: '',
+          person_name: '',
+          description: '',
+          sessions: 1,
+          rate: 0,
+          amount: 0,
+        },
+      ],
     })
   }
 
@@ -126,6 +136,8 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
                 ...form.items,
                 {
                   service_id: service.id,
+                  service_name: service.name,
+                  person_name: '',
                   description: service.name,
                   sessions: 1,
                   rate: service.price,
@@ -141,15 +153,26 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
           <div className="mt-3 space-y-3">
             {form.items.map((item, i) => (
               <div key={i} className="flex gap-2 items-start p-3 bg-brand-bg rounded-lg border border-brand-accent transition-all duration-200 hover:border-brand-primary">
-                <div className="flex-1 space-y-2">
-                  <div>
-                    <label className="field-label">Description / Session Name</label>
-                    <input
-                      value={item.description}
-                      onChange={e => updateItem(i, { description: e.target.value })}
-                      placeholder="e.g. Coaching Catherine"
-                      className="field-input"
-                    />
+                <div className="flex-1 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="field-label">Service Name</label>
+                      <input
+                        value={item.service_name ?? item.description ?? ''}
+                        onChange={e => updateItem(i, { service_name: e.target.value, description: e.target.value })}
+                        placeholder="e.g. Coaching"
+                        className="field-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="field-label">Person Name</label>
+                      <input
+                        value={item.person_name ?? ''}
+                        onChange={e => updateItem(i, { person_name: e.target.value })}
+                        placeholder="e.g. Catherine"
+                        className="field-input"
+                      />
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>

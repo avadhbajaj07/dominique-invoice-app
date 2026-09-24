@@ -116,8 +116,12 @@ const S = StyleSheet.create({
     flexDirection: 'row',
   },
   headerDesc: { width: 220 },
+  headerServiceWithPerson: { width: 145 },
+  headerPerson: { width: 105 },
   headerPrice: { width: 75, textAlign: 'center' },
+  headerPriceWithPerson: { width: 60, textAlign: 'center' },
   headerSessions: { width: 75, textAlign: 'center' },
+  headerSessionsWithPerson: { width: 60, textAlign: 'center' },
   headerAmount: {
     width: 120,
     marginLeft: -1,
@@ -158,8 +162,12 @@ const S = StyleSheet.create({
   descText: { fontSize: 10, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase' as any },
   bodyText: { fontSize: 10 },
   colDesc: { width: 220 },
+  colServiceWithPerson: { width: 145 },
+  colPerson: { width: 105 },
   colPrice: { width: 75, textAlign: 'center' },
+  colPriceWithPerson: { width: 60, textAlign: 'center' },
   colSessions: { width: 75, textAlign: 'center' },
+  colSessionsWithPerson: { width: 60, textAlign: 'center' },
   colAmount: { flex: 1, textAlign: 'right' },
   watermark: {
     position: 'absolute' as any,
@@ -287,50 +295,76 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
                 <Text style={S.metaLabel}>Due Date:</Text>
                 <Text style={S.metaValue}>{dueDate}</Text>
               </View>
-            ) : (
-              <View style={S.metaItem} />
-            )}
+            ) : null}
           </View>
 
           {/* Invoice To */}
           <View style={S.billTo}>
             <Text style={S.billLabel}>Invoice To:</Text>
-            <Text style={S.customerName}>{customer?.name ?? 'Client Name'}</Text>
+            {customer?.name ? <Text style={S.customerName}>{customer.name}</Text> : null}
             <Text style={S.payable}>
               Payable: {CLIENT.payment.terms} to{' '}
               <Text style={S.payableCompany}>{CLIENT.payment.beneficiary}</Text>
             </Text>
-            {customer?.email && <Text style={S.customerDetail}>{customer.email}</Text>}
-            {customer?.address && <Text style={S.customerDetail}>{customer.address}</Text>}
+            {customer?.email ? <Text style={S.customerDetail}>{customer.email}</Text> : null}
+            {customer?.address ? <Text style={S.customerDetail}>{customer.address}</Text> : null}
+            {customer?.phone ? <Text style={S.customerDetail}>{customer.phone}</Text> : null}
           </View>
 
           {/* Items Table */}
-          <View style={S.tableWrap}>
-            {/* Table header row */}
-            <View style={S.tableHeaderRow}>
-              <View style={S.tableHeaderMain}>
-                <Text style={[S.tableHeaderText, S.headerDesc]}>Description</Text>
-                <Text style={[S.tableHeaderText, S.headerPrice]}>Price</Text>
-                <Text style={[S.tableHeaderText, S.headerSessions]}>Sessions</Text>
-              </View>
-              <View style={S.headerAmount}>
-                <Text style={S.tableHeaderAmountText}>Total</Text>
-              </View>
-            </View>
-
-            {/* Table body */}
-            <View style={S.tableBody}>
-              <Image style={S.watermark} src={LOGO_PATH} />
-              {items.map((item, i) => (
-                <View key={i} style={S.row}>
-                  <Text style={[S.descText, S.colDesc]}>{item.description || '-'}</Text>
-                  <Text style={[S.bodyText, S.colPrice]}>{formatCurrency(item.rate, currency)}</Text>
-                  <Text style={[S.bodyText, S.colSessions]}>{String(item.sessions ?? item.quantity ?? 1)}</Text>
-                  <Text style={[S.bodyText, S.colAmount]}>{formatCurrency(item.amount, currency)}</Text>
+          {(() => {
+            const hasPerson = items.some(item => Boolean(item.person_name && item.person_name.trim()))
+            return (
+              <View style={S.tableWrap}>
+                {/* Table header row */}
+                <View style={S.tableHeaderRow}>
+                  <View style={S.tableHeaderMain}>
+                    <Text style={[S.tableHeaderText, hasPerson ? S.headerServiceWithPerson : S.headerDesc]}>
+                      {hasPerson ? 'Service' : 'Description'}
+                    </Text>
+                    {hasPerson && (
+                      <Text style={[S.tableHeaderText, S.headerPerson]}>Person</Text>
+                    )}
+                    <Text style={[S.tableHeaderText, hasPerson ? S.headerPriceWithPerson : S.headerPrice]}>
+                      Price
+                    </Text>
+                    <Text style={[S.tableHeaderText, hasPerson ? S.headerSessionsWithPerson : S.headerSessions]}>
+                      Sessions
+                    </Text>
+                  </View>
+                  <View style={S.headerAmount}>
+                    <Text style={S.tableHeaderAmountText}>Total</Text>
+                  </View>
                 </View>
-              ))}
-            </View>
-          </View>
+
+                {/* Table body */}
+                <View style={S.tableBody}>
+                  <Image style={S.watermark} src={LOGO_PATH} />
+                  {items.map((item, i) => (
+                    <View key={i} style={S.row}>
+                      <Text style={[S.descText, hasPerson ? S.colServiceWithPerson : S.colDesc]}>
+                        {item.service_name || item.description || '-'}
+                      </Text>
+                      {hasPerson && (
+                        <Text style={[S.descText, S.colPerson]}>
+                          {item.person_name || ''}
+                        </Text>
+                      )}
+                      <Text style={[S.bodyText, hasPerson ? S.colPriceWithPerson : S.colPrice]}>
+                        {formatCurrency(item.rate, currency)}
+                      </Text>
+                      <Text style={[S.bodyText, hasPerson ? S.colSessionsWithPerson : S.colSessions]}>
+                        {String(item.sessions ?? item.quantity ?? 1)}
+                      </Text>
+                      <Text style={[S.bodyText, S.colAmount]}>
+                        {formatCurrency(item.amount, currency)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )
+          })()}
 
           {/* Subtotals (if discount or tax) */}
           {hasDiscountOrTax && (
