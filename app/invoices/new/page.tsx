@@ -28,7 +28,7 @@ const DEFAULT_STATE: InvoiceFormState = {
   taxRate: CLIENT.invoice.defaultTaxRate,
   discount: 0,
   discountType: 'fixed',
-  notes: CLIENT.invoice.footerNote,
+  notes: '',
   status: 'draft',
 }
 

@@ -44,10 +44,13 @@ export function calcTotals(
   discountType: 'fixed' | 'percent'
 ): TotalsCalc {
   const subtotal = items.reduce((sum, item) => {
-    const lessonsMult = item.lessons && Number(item.lessons) > 0 ? Number(item.lessons) : 1
+    const sessions = item.sessions != null && !isNaN(item.sessions)
+      ? Number(item.sessions)
+      : (item.quantity != null ? Number(item.quantity) : 1)
+    const rate = item.rate != null && !isNaN(item.rate) ? Number(item.rate) : 0
     const amount = item.amount != null && !isNaN(item.amount)
       ? item.amount
-      : lessonsMult * (item.quantity || 1) * (item.rate || 0)
+      : rate * sessions
     return sum + amount
   }, 0)
 

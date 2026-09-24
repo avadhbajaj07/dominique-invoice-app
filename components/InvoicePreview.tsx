@@ -21,7 +21,7 @@ const WATERMARK = CLIENT.brand.watermark
 
 export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
   const [downloading, setDownloading] = useState(false)
-  const { customer, items, issueDate, dueDate, currency, taxRate, discount, discountType, notes } = form
+  const { customer, items, issueDate, dueDate, currency, taxRate, discount, discountType } = form
   const issue = issueDate ? formatDate(issueDate).toUpperCase() : '-'
   const due = dueDate ? formatDate(dueDate).toUpperCase() : ''
 
@@ -42,7 +42,7 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
         discount_amount: totals.discountAmount,
         total: totals.total,
         items,
-        notes: notes || null,
+        notes: null,
       }
 
       const res = await fetch('/api/generate-pdf', {
@@ -128,64 +128,52 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
           </section>
 
           {/* Items Table */}
-          {(() => {
-            const hasLessons = items.some(i => i.lessons != null && Number(i.lessons) > 0)
-            return (
-              <section className="mb-[1.8%]">
-                {/* Table header row */}
-                <div className="grid grid-cols-[1fr_23.5%] items-stretch">
-                  <div
-                    className={`grid min-w-0 ${hasLessons ? 'grid-cols-[180fr_75fr_40fr_50fr]' : 'grid-cols-[220fr_80fr_45fr]'} rounded-[12px] border-[1.6px] px-[3.36%] py-[1.5%] text-[2.18cqw] font-extrabold uppercase leading-none`}
-                    style={{ borderColor: BORDER }}
-                  >
-                    <span>Descriptions</span>
-                    <span className="text-center">Price</span>
-                    <span className="text-center">Qty</span>
-                    {hasLessons && <span className="text-center">No. of lessons</span>}
-                  </div>
-                  <div
-                    className="-ml-[1px] rounded-[12px] border-[1.6px] px-1 py-[1.5%] text-center text-[2.18cqw] font-extrabold uppercase text-white"
-                    style={{ backgroundColor: ROSE, borderColor: BORDER }}
-                  >
-                    Amount
-                  </div>
-                </div>
+          <section className="mb-[1.8%]">
+            {/* Table header row */}
+            <div className="grid grid-cols-[1fr_23.5%] items-stretch">
+              <div
+                className="grid min-w-0 grid-cols-[200fr_75fr_75fr] rounded-[12px] border-[1.6px] px-[3.36%] py-[1.5%] text-[2.18cqw] font-extrabold uppercase leading-none"
+                style={{ borderColor: BORDER }}
+              >
+                <span>Description</span>
+                <span className="text-center">Price</span>
+                <span className="text-center">Sessions</span>
+              </div>
+              <div
+                className="-ml-[1px] rounded-[12px] border-[1.6px] px-1 py-[1.5%] text-center text-[2.18cqw] font-extrabold uppercase text-white"
+                style={{ backgroundColor: ROSE, borderColor: BORDER }}
+              >
+                Total
+              </div>
+            </div>
 
-                {/* Table body */}
-                <div
-                  className="relative -mt-[1px] min-h-[26cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[2.5%]"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Watermark />
-                  {items.length === 0 ? (
-                    <p className="relative text-center text-[2.35cqw]" style={{ color: ROSE }}>
-                      Add services to see them here
-                    </p>
-                  ) : (
-                    <div className="relative space-y-[2cqw]">
-                      {items.map((item, i) => (
-                        <div
-                          key={i}
-                          className={`grid ${hasLessons ? 'grid-cols-[180fr_75fr_40fr_50fr_107fr]' : 'grid-cols-[220fr_80fr_45fr_107fr]'} items-start text-[2.35cqw] leading-none mb-[2.01%] last:mb-0`}
-                        >
-                          <span className="font-semibold uppercase truncate">{item.description || '-'}</span>
-                          <span className="text-center truncate">{formatCurrency(item.rate, currency)}</span>
-                          <span className="text-center truncate">{item.quantity}</span>
-                          {hasLessons && (
-                            <span className="text-center truncate">
-                              {item.lessons && Number(item.lessons) > 0 ? item.lessons : ''}
-                            </span>
-                          )}
-                          <span className="text-right truncate">{formatCurrency(item.amount, currency)}</span>
-                        </div>
-                      ))}
+            {/* Table body */}
+            <div
+              className="relative -mt-[1px] min-h-[26cqw] overflow-hidden rounded-[20px] border-[1.6px] px-[3.36%] py-[2.5%]"
+              style={{ borderColor: BORDER }}
+            >
+              <Watermark />
+              {items.length === 0 ? (
+                <p className="relative text-center text-[2.35cqw]" style={{ color: ROSE }}>
+                  Add services to see them here
+                </p>
+              ) : (
+                <div className="relative space-y-[2cqw]">
+                  {items.map((item, i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-[200fr_75fr_75fr_107fr] items-start text-[2.35cqw] leading-none mb-[2.01%] last:mb-0"
+                    >
+                      <span className="font-semibold uppercase truncate">{item.description || '-'}</span>
+                      <span className="text-center truncate">{formatCurrency(item.rate, currency)}</span>
+                      <span className="text-center truncate">{item.sessions ?? item.quantity ?? 1}</span>
+                      <span className="text-right truncate">{formatCurrency(item.amount, currency)}</span>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </section>
-            )
-          })()}
-
+              )}
+            </div>
+          </section>
 
           {/* Payment Details + Total */}
           <div className="mb-[2.0%] grid grid-cols-[1fr_37%] gap-[3.36%]">
@@ -204,16 +192,6 @@ export default function InvoicePreview({ form, totals, invoiceNumber }: Props) {
               <span className="text-[2.35cqw] font-extrabold leading-none">{formatCurrency(totals.total, currency)}</span>
             </div>
           </div>
-
-          {/* Notes & Payment Instructions */}
-          {notes && (
-            <div className="mb-[1.8%]">
-              <p className="mb-[0.8%] text-[2.18cqw] font-extrabold uppercase leading-none">
-                Notes & Payment Instructions
-              </p>
-              <p className="text-[2.01cqw] leading-[1.3] whitespace-pre-wrap">{notes}</p>
-            </div>
-          )}
 
         </div>
 

@@ -30,10 +30,11 @@ export interface InvoiceItem {
   invoice_id?: string
   service_id?: string | null
   description: string
-  quantity: number
-  rate: number
-  lessons?: number | null
-  amount: number            // computed: quantity × rate (× lessons if provided)
+  rate: number              // price per session
+  sessions?: number         // number of sessions
+  quantity?: number         // backward compat
+  lessons?: number | null   // backward compat
+  amount: number            // computed: rate × sessions
 }
 
 export interface Invoice {

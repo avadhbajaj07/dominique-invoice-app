@@ -23,8 +23,9 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
     const items = form.items.map((item, i) => {
       if (i !== idx) return item
       const updated = { ...item, ...patch }
-      const lessonsMult = updated.lessons && Number(updated.lessons) > 0 ? Number(updated.lessons) : 1
-      updated.amount = lessonsMult * (updated.quantity || 1) * (updated.rate || 0)
+      const sessions = updated.sessions != null && !isNaN(updated.sessions) ? Number(updated.sessions) : 1
+      const rate = updated.rate != null && !isNaN(updated.rate) ? Number(updated.rate) : 0
+      updated.amount = rate * sessions
       return updated
     })
     set({ items })
@@ -36,7 +37,7 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
 
   const addBlankItem = () => {
     set({
-      items: [...form.items, { description: '', quantity: 1, rate: 0, lessons: null, amount: 0 }],
+      items: [...form.items, { description: '', sessions: 1, rate: 0, amount: 0 }],
     })
   }
 
@@ -106,14 +107,14 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
       {/* ── Services / Line Items Section ── */}
       <div className="border-t border-brand-accent pt-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm text-gray-700">Services & Session Rates</h3>
+          <h3 className="font-semibold text-sm text-gray-700">Services & Sessions</h3>
           <button
             type="button"
             onClick={addBlankItem}
-            className="text-xs font-semibold hover:underline animate-pulse"
+            className="text-xs font-semibold hover:underline"
             style={{ color: '#C17A7A' }}
           >
-            + Add Blank Row
+            + Add another service / session
           </button>
         </div>
 
@@ -126,7 +127,7 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
                 {
                   service_id: service.id,
                   description: service.name,
-                  quantity: 1,
+                  sessions: 1,
                   rate: service.price,
                   amount: service.price,
                 },
@@ -146,11 +147,11 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
                     <input
                       value={item.description}
                       onChange={e => updateItem(i, { description: e.target.value })}
-                      placeholder="e.g. French Lesson - Intermediate"
+                      placeholder="e.g. Coaching Catherine"
                       className="field-input"
                     />
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                       <label className="field-label">Price ({form.currency})</label>
                       <input
@@ -163,29 +164,14 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
                       />
                     </div>
                     <div>
-                      <label className="field-label">Qty (Hours)</label>
+                      <label className="field-label">Sessions</label>
                       <input
                         type="number"
-                        value={item.quantity === 0 ? '' : item.quantity}
-                        min={0.5}
-                        step={0.5}
-                        placeholder="1"
-                        onChange={e => updateItem(i, { quantity: e.target.value === '' ? 0 : Number(e.target.value) })}
-                        className="field-input"
-                      />
-                    </div>
-                    <div>
-                      <label className="field-label">No. of Lessons</label>
-                      <input
-                        type="number"
-                        value={item.lessons ?? ''}
+                        value={item.sessions === 0 ? '' : (item.sessions ?? '')}
                         min={1}
                         step={1}
-                        placeholder="Blank"
-                        onChange={e => {
-                          const val = e.target.value === '' ? null : Number(e.target.value)
-                          updateItem(i, { lessons: val })
-                        }}
+                        placeholder="1"
+                        onChange={e => updateItem(i, { sessions: e.target.value === '' ? 0 : Number(e.target.value) })}
                         className="field-input"
                       />
                     </div>
@@ -207,24 +193,21 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
                 </button>
               </div>
             ))}
+
+            <button
+              type="button"
+              onClick={addBlankItem}
+              className="w-full py-2.5 px-3 border border-dashed rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors hover:bg-white"
+              style={{ borderColor: '#C17A7A', color: '#C17A7A' }}
+            >
+              + Add another service / session
+            </button>
           </div>
         ) : (
           <p className="text-center py-6 text-xs text-gray-400 border border-dashed border-brand-accent rounded-lg bg-gray-50">
             No services added yet. Select a service above or add a blank line.
           </p>
         )}
-      </div>
-
-      {/* ── Notes Section ── */}
-      <div className="border-t border-brand-accent pt-5">
-        <label className="field-label font-semibold text-gray-700">Notes & Payment Instructions</label>
-        <textarea
-          value={form.notes}
-          onChange={e => set({ notes: e.target.value })}
-          rows={3}
-          className="field-input resize-none"
-          placeholder={CLIENT.invoice.footerNote}
-        />
       </div>
 
       {/* ── Totals summary ── */}

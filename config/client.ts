@@ -56,7 +56,7 @@ export const CLIENT = {
       middle: "Top",
       bottom: "Things",
     },
-    footerNote: "I thank you for your trust.",
+    footerNote: "",
     footerNote2: "I remain at your disposal should you have any query.",
   },
 

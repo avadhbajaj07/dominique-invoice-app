@@ -78,31 +78,27 @@ export async function POST(req: NextRequest) {
   }
 
   // Insert line items
-  const itemsWithLessons = body.items.map(item => {
-    const lessonsMult = item.lessons && Number(item.lessons) > 0 ? Number(item.lessons) : 1
+  const itemsToInsert = body.items.map(item => {
+    const sessions = item.sessions != null && !isNaN(item.sessions)
+      ? Number(item.sessions)
+      : (item.quantity != null ? Number(item.quantity) : 1)
+    const rate = Number(item.rate || 0)
     const amount = item.amount != null && !isNaN(item.amount)
       ? Number(item.amount)
-      : lessonsMult * (item.quantity || 1) * (item.rate || 0)
+      : rate * sessions
     return {
       invoice_id: invoice.id,
       service_id: item.service_id ?? null,
       description: item.description,
-      quantity: item.quantity,
-      rate: item.rate,
-      lessons: item.lessons ? Number(item.lessons) : null,
+      quantity: sessions,
+      rate,
       amount,
     }
   })
 
-  // Try inserting with lessons column
-  const { error: itemsError } = await db.from('invoice_items').insert(itemsWithLessons)
+  const { error: itemsError } = await db.from('invoice_items').insert(itemsToInsert)
   if (itemsError) {
-    // If the database schema does not have the 'lessons' column yet, fallback to inserting without it
-    const itemsWithoutLessons = itemsWithLessons.map(({ lessons, ...rest }) => rest)
-    const { error: fallbackError } = await db.from('invoice_items').insert(itemsWithoutLessons)
-    if (fallbackError) {
-      return NextResponse.json({ error: fallbackError.message }, { status: 500 })
-    }
+    return NextResponse.json({ error: itemsError.message }, { status: 500 })
   }
 
   return NextResponse.json({ ...invoice, invoice_number }, { status: 201 })
