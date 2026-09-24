@@ -155,9 +155,13 @@ export async function sendInvoiceEmail(
 
   console.log(`[Email] Sending invoice ${invoice.invoice_number} to ${customer.email}...`)
 
+  const senderAddress = process.env.SMTP_FROM || process.env.SMTP_USER || CLIENT.email.fromAddress
+  const replyToAddress = CLIENT.contact.email || CLIENT.email.fromAddress
+
   try {
     const info = await transporter.sendMail({
-      from: `"${CLIENT.email.fromName}" <${CLIENT.email.fromAddress}>`,
+      from: `"${CLIENT.email.fromName}" <${senderAddress}>`,
+      replyTo: `"${CLIENT.email.fromName}" <${replyToAddress}>`,
       to: customer.email,
       subject,
       text: textBody,
