@@ -52,7 +52,7 @@ export default function InvoiceForm({ form, onChange, totals }: Props) {
   }
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-xl border border-brand-accent bg-white p-5 space-y-6">
+    <div className="min-w-0 rounded-xl border border-brand-accent bg-white p-5 space-y-6 relative">
 
       {/* ── Client / Customer Section ── */}
       <div>
